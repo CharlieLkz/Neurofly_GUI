@@ -34,7 +34,7 @@ gif_jobs = []
 
 # === FUNCIONES === #
 def capturar_datos(nombre_participante, tarea, subtarea, duracion):
-    carpeta = os.path.join(os.getcwd(), "v2", "experiment_gui", nombre_participante)
+    carpeta = os.path.join("C:/Users/cbaer/OneDrive/Desktop/Osaka Things/MiniDrone/RepoAURA/AURA_SDK/v2/experiment_gui", nombre_participante)
     os.makedirs(carpeta, exist_ok=True)
     archivo = os.path.join(carpeta, f"{nombre_participante}_{tarea}_{subtarea}.csv")
 
@@ -134,7 +134,8 @@ def salir_aplicacion():
 ventana = tk.Tk()
 ventana.title("Neurofly GUI Experiment")
 ventana.configure(bg="#002147")
-ventana.attributes('-fullscreen', True)
+ventana.geometry("1920x1080")
+ventana.resizable(True, True)
 
 lbl = tk.Label(ventana, text="Bienvenido/a al experimento de Neurofly\nIngresa tu nombre:", font=("Arial", 36, "bold"), bg="#002147", fg="white")
 lbl.pack(pady=30)
@@ -157,11 +158,11 @@ frame_gifs.pack(pady=20, expand=True, fill=tk.BOTH)
 frame_gifs.columnconfigure(0, weight=1)
 frame_gifs.columnconfigure(1, weight=1)
 
-# Ajuste de posicionamiento de los GIFs según lo indicado
+# Posiciones ajustadas para subir mucho más los GIFs (en especial los de Moving)
 gif_label1 = tk.Label(frame_gifs, bg="#002147")
-gif_label1.grid(row=0, column=0, sticky="nw", padx=(150, 50), pady=(0, 80))
+gif_label1.grid(row=0, column=0, sticky="nw", padx=(66, 0), pady=(0, 200))
 
 gif_label2 = tk.Label(frame_gifs, bg="#002147")
-gif_label2.grid(row=0, column=1, sticky="ne", padx=(50, 150), pady=(0, 80))
+gif_label2.grid(row=0, column=1, sticky="ne", padx=(0, 66), pady=(0, 120))
 
 ventana.mainloop()
