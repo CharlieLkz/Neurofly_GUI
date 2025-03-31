@@ -10,7 +10,7 @@ from PIL import Image, ImageTk, ImageSequence
 
 # === CONFIGURACIONES === #
 STREAM_NAME = "AURA"
-SCALE_FACTOR_EEG = (4500000)/24/(2**23-1)
+SCALE_FACTOR_EEG = (4500000)/24/(2**23-1)  # µV/count
 N_CANALES = 8
 DURACION_REST = 20
 DURACION_TAREA = 20
@@ -34,6 +34,28 @@ gif_jobs = []
 is_rest_phase = False
 
 # === FUNCIONES === #
+def capturar_datos(nombre_participante, tarea, subtarea, duracion):
+    carpeta = os.path.join(os.path.dirname(__file__), nombre_participante)
+    os.makedirs(carpeta, exist_ok=True)
+    archivo = os.path.join(carpeta, f"{nombre_participante}_{tarea}_{subtarea}.csv")
+
+    with open(archivo, mode='w', newline='') as f:
+        escritor = csv.writer(f)
+        escritor.writerow(["Timestamp"] + [f"Canal{i+1}" for i in range(N_CANALES)])
+
+        streams = resolve_stream('name', STREAM_NAME)
+        inlet = StreamInlet(streams[0])
+
+        tiempo_inicio = time.time()
+        while (time.time() - tiempo_inicio) < duracion:
+            sample, timestamp = inlet.pull_sample()
+            if sample:
+                muestra = [float(x) * SCALE_FACTOR_EEG for x in sample[:N_CANALES]]
+                escritor.writerow([timestamp] + muestra)
+            segundos_restantes = int(duracion - (time.time() - tiempo_inicio))
+            actualizar_temporizador(segundos_restantes)
+            time.sleep(0.01)
+
 def actualizar_temporizador(segundos_restantes):
     temporizador_label.config(text=f"Tiempo restante: {segundos_restantes}s")
     ventana.update_idletasks()
@@ -48,6 +70,8 @@ def limpiar_animaciones():
     gif_label2.image = None
 
 def animar_gif(label, gif_frames, delay, index=0):
+    if not gif_frames:
+        return
     frame = gif_frames[index]
     label.configure(image=frame)
     label.image = frame
@@ -56,67 +80,15 @@ def animar_gif(label, gif_frames, delay, index=0):
 
 def mostrar_gif_dual(tipo_accion, parte_cuerpo):
     limpiar_animaciones()
-    path1 = os.path.join("gif", f"{tipo_accion}.gif")
-    path2 = os.path.join("gif", f"{parte_cuerpo}.gif")
+    gif_dir = os.path.join(os.path.dirname(__file__), "gif")
+    path1 = os.path.join(gif_dir, f"{tipo_accion}.gif")
+    path2 = os.path.join(gif_dir, f"{parte_cuerpo}.gif")
+
     gif1_frames = [ImageTk.PhotoImage(img.resize((250, 250))) for img in ImageSequence.Iterator(Image.open(path1))]
     gif2_frames = [ImageTk.PhotoImage(img.resize((250, 250))) for img in ImageSequence.Iterator(Image.open(path2))]
+
     animar_gif(gif_label1, gif1_frames, 100)
     animar_gif(gif_label2, gif2_frames, 100)
-
-def capturar_rest(nombre_participante, callback):
-    carpeta = os.path.join("C:/Users/cbaer/OneDrive/Desktop/Osaka Things/MiniDrone/RepoAURA/AURA_SDK/v2/experiment_gui", nombre_participante)
-    os.makedirs(carpeta, exist_ok=True)
-    archivo = os.path.join(carpeta, f"{nombre_participante}_Rest_Base.csv")
-
-    streams = resolve_stream('name', STREAM_NAME)
-    inlet = StreamInlet(streams[0])
-    print("Stream conectado \u2714\ufe0f")
-
-    writer = open(archivo, mode='w', newline='')
-    escritor = csv.writer(writer)
-    escritor.writerow(["Timestamp"] + [f"Canal{i+1}" for i in range(N_CANALES)])
-
-    start_time = time.time()
-
-    def loop():
-        elapsed = time.time() - start_time
-        remaining = int(DURACION_REST - elapsed)
-        if remaining >= 0:
-            sample, timestamp = inlet.pull_sample()
-            if sample:
-                muestra = [float(x) * SCALE_FACTOR_EEG for x in sample[:N_CANALES]]
-                escritor.writerow([timestamp] + muestra)
-            actualizar_temporizador(remaining)
-            ventana.after(10, loop)
-        else:
-            writer.close()
-            callback()
-
-    loop()
-
-def capturar_datos(nombre_participante, tarea, subtarea, duracion):
-    carpeta = os.path.join("C:/Users/cbaer/OneDrive/Desktop/Osaka Things/MiniDrone/RepoAURA/AURA_SDK/v2/experiment_gui", nombre_participante)
-    os.makedirs(carpeta, exist_ok=True)
-    archivo = os.path.join(carpeta, f"{nombre_participante}_{tarea}_{subtarea}.csv")
-
-    with open(archivo, mode='w', newline='') as f:
-        escritor = csv.writer(f)
-        escritor.writerow(["Timestamp"] + [f"Canal{i+1}" for i in range(N_CANALES)])
-
-        print("Buscando stream de AURA...")
-        streams = resolve_stream('name', STREAM_NAME)
-        inlet = StreamInlet(streams[0])
-        print("Stream conectado \u2714\ufe0f")
-
-        tiempo_inicio = time.time()
-        while (time.time() - tiempo_inicio) < duracion:
-            sample, timestamp = inlet.pull_sample()
-            if sample:
-                muestra = [float(x) * SCALE_FACTOR_EEG for x in sample[:N_CANALES]]
-                escritor.writerow([timestamp] + muestra)
-            segundos_restantes = int(duracion - (time.time() - tiempo_inicio))
-            actualizar_temporizador(segundos_restantes)
-            time.sleep(0.01)
 
 def iniciar_experimento():
     global is_rest_phase
@@ -125,41 +97,39 @@ def iniciar_experimento():
         messagebox.showerror("Error", "Debes ingresar un nombre")
         return
 
-    lbl.config(text=f"Capturando REST para: {nombre}\nRel\u00e1jate y respira...", font=("Arial", 36, "bold"))
+    lbl.config(text=f"Capturando REST para: {nombre}\nRelájate y respira...", font=("Arial", 36, "bold"))
     entry_nombre.config(state='disabled')
     btn_comenzar.config(state='disabled')
 
     def secuencia():
         global is_rest_phase
-
-        def continuar():
-            is_rest_phase = False
-            for parte, tipo in SUBTAREAS:
-                limpiar_animaciones()
-                instrucciones_titulo = f"{tipo.upper()}\n{parte.upper()}"
-                if tipo == "Moving":
-                    if "Fist" in parte:
-                        instrucciones_texto = "Cierra el pu\u00f1o durante 1 segundo\ny luego su\u00e9ltalo durante 1 segundo.\nRepite esto hasta que se acabe el tiempo."
-                    elif "Foot" in parte:
-                        instrucciones_texto = "Despega la planta del pie del suelo,\nmantenla en el aire durante 1 segundo\ny vuelve a bajarla.\nRepite esto hasta que finalice el tiempo."
-                    else:
-                        instrucciones_texto = "Levanta tu brazo hacia adelante en 1 segundo,\nmantenlo arriba 1 segundo y b\u00e1jalo en 1 segundo.\nRepite esto hasta que termine."
-                else:
-                    instrucciones_texto = "Conc\u00e9ntrate en imaginar el movimiento\nsin realizarlo."
-
-                lbl.config(text=f"{instrucciones_titulo}\n\n{instrucciones_texto}", font=("Arial", 36, "bold"))
-                temporizador_label.config(text="Descansa 3 segundos...")
-                time.sleep(3)
-                mostrar_gif_dual(tipo, parte)
-                capturar_datos(nombre, parte, tipo, DURACION_TAREA)
-
-            limpiar_animaciones()
-            lbl.config(text="\u00a1Gracias por participar!", font=("Arial", 48, "bold"))
-            messagebox.showinfo("Finalizado", "Captura completa para este participante.")
-            ventana.quit()
-
         is_rest_phase = True
-        capturar_rest(nombre, continuar)
+        capturar_datos(nombre, "Rest", "Base", DURACION_REST)
+        is_rest_phase = False
+
+        for parte, tipo in SUBTAREAS:
+            limpiar_animaciones()
+            instrucciones_titulo = f"{tipo.upper()}\n{parte.upper()}"
+            if tipo == "Moving":
+                if "Fist" in parte:
+                    instrucciones_texto = "Cierra el puño durante 1 segundo\ny luego suéltalo durante 1 segundo.\nRepite esto hasta que se acabe el tiempo."
+                elif "Foot" in parte:
+                    instrucciones_texto = "Despega la planta del pie del suelo,\nmantenla en el aire durante 1 segundo\ny vuelve a bajarla.\nRepite esto hasta que finalice el tiempo."
+                else:
+                    instrucciones_texto = "Levanta tu brazo hacia adelante en 1 segundo,\nmantenlo arriba 1 segundo y bájalo en 1 segundo.\nRepite esto hasta que termine."
+            else:
+                instrucciones_texto = "Concéntrate en imaginar el movimiento\nsin realizarlo."
+
+            lbl.config(text=f"{instrucciones_titulo}\n\n{instrucciones_texto}", font=("Arial", 36, "bold"))
+            temporizador_label.config(text="Descansa 3 segundos...")
+            time.sleep(3)
+            mostrar_gif_dual(tipo, parte)
+            capturar_datos(nombre, parte, tipo, DURACION_TAREA)
+
+        limpiar_animaciones()
+        lbl.config(text="¡Gracias por participar!", font=("Arial", 48, "bold"))
+        messagebox.showinfo("Finalizado", "Captura completa para este participante.")
+        ventana.quit()
 
     threading.Thread(target=secuencia, daemon=True).start()
 
@@ -195,9 +165,9 @@ frame_gifs.columnconfigure(0, weight=1)
 frame_gifs.columnconfigure(1, weight=1)
 
 gif_label1 = tk.Label(frame_gifs, bg="#002147")
-gif_label1.grid(row=0, column=0, sticky="nw", padx=(66, 0), pady=(0, 400))
+gif_label1.grid(row=0, column=0, sticky="nw", padx=(66, 0), pady=(0, 500))
 
 gif_label2 = tk.Label(frame_gifs, bg="#002147")
-gif_label2.grid(row=0, column=1, sticky="ne", padx=(0, 66), pady=(0, 450))
+gif_label2.grid(row=0, column=1, sticky="ne", padx=(0, 66), pady=(0, 550))
 
 ventana.mainloop()
