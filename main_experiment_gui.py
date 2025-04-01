@@ -90,6 +90,13 @@ def mostrar_gif_dual(tipo_accion, parte_cuerpo):
     animar_gif(gif_label1, gif1_frames, 100)
     animar_gif(gif_label2, gif2_frames, 100)
 
+def mostrar_gif_rest():
+    limpiar_animaciones()
+    gif_dir = os.path.join(os.path.dirname(__file__), "gif")
+    path = os.path.join(gif_dir, "Breathe.gif")
+    gif_frames = [ImageTk.PhotoImage(img.resize((250, 250))) for img in ImageSequence.Iterator(Image.open(path))]
+    animar_gif(gif_label1, gif_frames, 100)
+
 def iniciar_experimento():
     global is_rest_phase
     nombre = entry_nombre.get().strip()
@@ -104,6 +111,7 @@ def iniciar_experimento():
     def secuencia():
         global is_rest_phase
         is_rest_phase = True
+        mostrar_gif_rest()
         capturar_datos(nombre, "Rest", "Base", DURACION_REST)
         is_rest_phase = False
 
@@ -165,9 +173,9 @@ frame_gifs.columnconfigure(0, weight=1)
 frame_gifs.columnconfigure(1, weight=1)
 
 gif_label1 = tk.Label(frame_gifs, bg="#002147")
-gif_label1.grid(row=0, column=0, sticky="nw", padx=(66, 0), pady=(0, 500))
+gif_label1.grid(row=0, column=0, sticky="nw", padx=(66, 0), pady=(0, 300))
 
 gif_label2 = tk.Label(frame_gifs, bg="#002147")
-gif_label2.grid(row=0, column=1, sticky="ne", padx=(0, 66), pady=(0, 550))
+gif_label2.grid(row=0, column=1, sticky="ne", padx=(0, 66), pady=(0, 180))
 
 ventana.mainloop()
