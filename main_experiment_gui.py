@@ -12,7 +12,9 @@ from PIL import Image, ImageTk, ImageSequence
 # === CONFIGURACIONES === #
 STREAM_NAME = "AURA_Power"
 SCALE_FACTOR_EEG = (4500000)/24/(2**23-1)
-N_CANALES = 40
+N_CANALES = 8  # Número de canales físicos
+BANDAS = ["Delta", "Theta", "Alpha", "Beta", "Gamma"]  # Bandas de frecuencia
+TOTAL_COLUMNAS = N_CANALES * len(BANDAS)  # Total de columnas de datos (8 canales x 5 bandas = 40)
 DURACION_REST = 20
 DURACION_TAREA = 20
 SUBTAREAS = [
@@ -27,7 +29,11 @@ SUBTAREAS = [
     ("RightFoot", "Thinking"),
     ("RightFoot", "Moving"),
     ("LeftFoot", "Thinking"),
-    ("LeftFoot", "Moving")
+    ("LeftFoot", "Moving"),
+    ("Flecha Izquierda", "Thinking"),
+    ("Flecha Derecha", "Thinking"),
+    ("Flecha Arriba", "Thinking"),
+    ("Flecha Abajo", "Thinking")
 ]
 
 # === VARIABLES DE CONTROL === #
@@ -135,10 +141,12 @@ def limpiar_animaciones():
     for job in gif_jobs:
         ventana.after_cancel(job)
     gif_jobs.clear()
-    gif_label1.config(image='')
-    gif_label2.config(image='')
-    gif_label1.image = None
-    gif_label2.image = None
+    if hasattr(gif_label1, 'image'):
+        gif_label1.config(image='')
+        gif_label1.image = None
+    if hasattr(gif_label2, 'image'):
+        gif_label2.config(image='')
+        gif_label2.image = None
 
 def animar_gif(label, gif_frames, delay, index=0):
     if gif_frames:
@@ -154,10 +162,10 @@ def mostrar_gif_dual(tipo_accion, parte_cuerpo):
     path2 = os.path.join("gif", f"{parte_cuerpo}.gif")
     if not os.path.exists(path1) or not os.path.exists(path2):
         return
-    gif1_frames = [ImageTk.PhotoImage(img.resize((250, 250))) for img in ImageSequence.Iterator(Image.open(path1))]
-    gif2_frames = [ImageTk.PhotoImage(img.resize((250, 250))) for img in ImageSequence.Iterator(Image.open(path2))]
-    gif_label1.grid(row=0, column=0, padx=(200, 10), pady=(20, 20), sticky= "e")
-    gif_label2.grid(row=0, column=1, padx=(10, 200), pady=(20, 20), sticky= "w")
+    gif1_frames = [ImageTk.PhotoImage(img.resize((200, 200))) for img in ImageSequence.Iterator(Image.open(path1))]
+    gif2_frames = [ImageTk.PhotoImage(img.resize((200, 200))) for img in ImageSequence.Iterator(Image.open(path2))]
+    
+    # Animar los GIFs en sus respectivas etiquetas
     animar_gif(gif_label1, gif1_frames, 100)
     animar_gif(gif_label2, gif2_frames, 100)
 
@@ -166,18 +174,46 @@ def mostrar_gif_rest():
     path = os.path.join("gif", "Breathe.gif")
     if not os.path.exists(path):
         return
-    gif_frames = [ImageTk.PhotoImage(img.resize((250, 250))) for img in ImageSequence.Iterator(Image.open(path))]
-    gif_label1.grid(row=0, column=0, columnspan=2, pady=(0, 20))
+    gif_frames = [ImageTk.PhotoImage(img.resize((200, 200))) for img in ImageSequence.Iterator(Image.open(path))]
+    
+    # Centrar el GIF de descanso en el contenedor central
     animar_gif(gif_label1, gif_frames, 100)
 
 def capturar_datos(nombre, tarea, subtarea, duracion):
     carpeta = os.path.join(os.path.dirname(__file__), "data", nombre)
     os.makedirs(carpeta, exist_ok=True)
-    archivo = os.path.join(carpeta, f"{nombre}_{tarea}_{subtarea}.csv")
+    
+    # Cambiar el sufijo a "VI" para las flechas, manteniendo el original para el resto
+    if tarea in ["Flecha Arriba", "Flecha Abajo", "Flecha Izquierda", "Flecha Derecha"]:
+        # Eliminar el espacio para el nombre del archivo
+        tarea_sin_espacio = tarea.replace(" ", "")
+        archivo = os.path.join(carpeta, f"{nombre}_{tarea_sin_espacio}_VI.csv")
+        tipo_tarea = "Visual Imagery"
+    else:
+        archivo = os.path.join(carpeta, f"{nombre}_{tarea}_{subtarea}.csv")
+        tipo_tarea = subtarea
+    
+    # Crear encabezados para las bandas de frecuencia para cada canal
+    encabezados = ["Timestamp"]
+    for i in range(N_CANALES):
+        for banda in BANDAS:
+            encabezados.append(f"Canal{i+1}_{banda}")
+    
+    # Añadir metadatos para ayudar en el análisis
+    metadatos = {
+        "Nombre": nombre,
+        "Tarea": tarea,
+        "Tipo": tipo_tarea,
+        "Fecha": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+        "Duración": duracion
+    }
     def data_thread():
         with open(archivo, mode='w', newline='') as f:
             writer = csv.writer(f)
-            writer.writerow(["Timestamp"] + [f"Canal{i+1}" for i in range(N_CANALES)])
+            # Escribir metadatos como comentarios
+            for key, value in metadatos.items():
+                f.write(f"# {key}: {value}\n")
+            writer.writerow(encabezados)
             if not controller.connected or not controller.inlet:
                 ui_queue.put(('connection_error', "No hay conexión con AURA"))
                 return
@@ -185,7 +221,8 @@ def capturar_datos(nombre, tarea, subtarea, duracion):
             while controller.running and (elapsed := time.time() - start) < duracion:
                 sample, timestamp = controller.inlet.pull_sample(timeout=0.1)
                 if sample:
-                    muestra = [float(x) * SCALE_FACTOR_EEG for x in sample[:N_CANALES]]
+                    # Aplicar factor de escala a los datos
+                    muestra = [float(x) * SCALE_FACTOR_EEG for x in sample[:TOTAL_COLUMNAS]]
                     writer.writerow([timestamp] + muestra)
                     actualizar_temporizador(int(duracion - elapsed))
                 time.sleep(0.01)
@@ -214,14 +251,33 @@ def iniciar_experimento():
             mostrar_gif_rest()
             archivo_rest = os.path.join(os.path.dirname(__file__), "data", nombre, f"{nombre}_Rest_Base.csv")
             os.makedirs(os.path.dirname(archivo_rest), exist_ok=True)
+            
+            # Crear encabezados para las bandas de frecuencia para cada canal
+            encabezados = ["Timestamp"]
+            for i in range(N_CANALES):
+                for banda in BANDAS:
+                    encabezados.append(f"Canal{i+1}_{banda}")
+            
+            # Añadir metadatos para REST
+            metadatos_rest = {
+                "Nombre": nombre,
+                "Tarea": "Rest",
+                "Tipo": "Base",
+                "Fecha": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+                "Duración": DURACION_REST
+            }
+            
             with open(archivo_rest, mode='w', newline='') as f:
                 writer = csv.writer(f)
-                writer.writerow(["Timestamp"] + [f"Canal{i+1}" for i in range(N_CANALES)])
+                # Escribir metadatos como comentarios
+                for key, value in metadatos_rest.items():
+                    f.write(f"# {key}: {value}\n")
+                writer.writerow(encabezados)
                 start = time.time()
                 while controller.running and (elapsed := time.time() - start) < DURACION_REST:
                     sample, timestamp = controller.inlet.pull_sample(timeout=0.1)
                     if sample:
-                        muestra = [float(x) * SCALE_FACTOR_EEG for x in sample[:N_CANALES]]
+                        muestra = [float(x) * SCALE_FACTOR_EEG for x in sample[:TOTAL_COLUMNAS]]
                         writer.writerow([timestamp] + muestra)
                         actualizar_temporizador(int(DURACION_REST - elapsed))
                     time.sleep(0.01)
@@ -235,7 +291,21 @@ def iniciar_experimento():
                     else:
                         instrucciones_texto = "Levanta tu brazo hacia adelante en 1 segundo,\nmantenlo arriba 1 segundo y bájalo en 1 segundo.\nRepite esto hasta que termine."
                 else:
-                    instrucciones_texto = "Concéntrate en imaginar el movimiento\nsin realizarlo."
+                    if "Flecha Arriba" in parte:
+                        instrucciones_titulo = "VISUAL IMAGERY\nFLECHA ARRIBA"
+                        instrucciones_texto = "Concéntrate en la dirección de la flecha hacia arriba\nsin realizar ningún movimiento."
+                    elif "Flecha Abajo" in parte:
+                        instrucciones_titulo = "VISUAL IMAGERY\nFLECHA ABAJO"
+                        instrucciones_texto = "Concéntrate en la dirección de la flecha hacia abajo\nsin realizar ningún movimiento."
+                    elif "Flecha Izquierda" in parte:
+                        instrucciones_titulo = "VISUAL IMAGERY\nFLECHA IZQUIERDA"
+                        instrucciones_texto = "Concéntrate en la dirección de la flecha hacia la izquierda\nsin realizar ningún movimiento."
+                    elif "Flecha Derecha" in parte:
+                        instrucciones_titulo = "VISUAL IMAGERY\nFLECHA DERECHA"
+                        instrucciones_texto = "Concéntrate en la dirección de la flecha hacia la derecha\nsin realizar ningún movimiento."
+                    else:
+                        instrucciones_titulo = "MOTOR IMAGERY\n" + parte.upper()
+                        instrucciones_texto = "Concéntrate en imaginar el movimiento\nsin realizarlo."
                 instruccion = f"{instrucciones_titulo}\n\n{instrucciones_texto}"
                 ui_queue.put(('show_instruction', instruccion))
                 ui_queue.put(('update_timer', "Preparando..."))
@@ -280,8 +350,8 @@ style.configure('TLabel', background='#002147', foreground='white', font=('Arial
 style.configure('TButton', font=('Arial', 16))
 
 lbl = tk.Label(main_frame, text="Bienvenido/a al experimento de Neurofly\nIngresa tu nombre:",
-              font=("Arial", 36, "bold"), bg="#002147", fg="white", wraplength=1800)
-lbl.pack(pady=20)
+              font=("Arial", 32, "bold"), bg="#002147", fg="white", wraplength=1800)
+lbl.pack(pady=15)
 
 entry_frame = tk.Frame(main_frame, bg="#002147")
 entry_frame.pack(pady=10)
@@ -308,26 +378,29 @@ btn_salir = tk.Button(button_frame, text="Salir", font=("Arial", 20),
                     command=salir_aplicacion, bg="#990000", fg="white")
 btn_salir.pack(side=tk.LEFT, padx=10)
 
-temporizador_label = tk.Label(main_frame, text="Tiempo restante:", font=("Arial", 28),
+temporizador_label = tk.Label(main_frame, text="Tiempo restante:", font=("Arial", 24),
                              bg="#002147", fg="white")
-temporizador_label.pack(pady=10)
+temporizador_label.pack(pady=8)
 
-preparacion_label = tk.Label(main_frame, text="", font=("Arial", 24, "italic"),
+preparacion_label = tk.Label(main_frame, text="", font=("Arial", 22, "italic"),
                            bg="#002147", fg="#FFA500")
-preparacion_label.pack(pady=5)
+preparacion_label.pack(pady=4)
 
-frame_gifs = tk.Frame(main_frame, bg="#002147", height=300)
-frame_gifs.pack(pady=20, fill=tk.X)
+frame_gifs = tk.Frame(main_frame, bg="#002147", height=350, width=800)
+frame_gifs.pack(pady=(0, 15), fill=tk.X)  # Reducir padding inferior para subir los gifs
 frame_gifs.pack_propagate(False)
+frame_gifs.grid_propagate(False)
 
-frame_gifs.columnconfigure(0, weight=1)
-frame_gifs.columnconfigure(1, weight=1)
+# Contenedor central para mejorar la alineación
+center_container = tk.Frame(frame_gifs, bg="#002147")
+center_container.place(relx=0.5, rely=0.4, anchor="center")  # Alinear al centro pero más arriba
 
-gif_label1 = tk.Label(frame_gifs, bg="#002147")
-gif_label1.grid(row=0, column=0)
+# Configurar los GIFs dentro del contenedor central
+gif_label1 = tk.Label(center_container, bg="#002147")
+gif_label1.grid(row=0, column=0, padx=10)
 
-gif_label2 = tk.Label(frame_gifs, bg="#002147")
-gif_label2.grid(row=0, column=1)
+gif_label2 = tk.Label(center_container, bg="#002147")
+gif_label2.grid(row=0, column=1, padx=10)
 
 ventana.protocol("WM_DELETE_WINDOW", salir_aplicacion)
 ventana.after(100, procesar_cola_ui)
