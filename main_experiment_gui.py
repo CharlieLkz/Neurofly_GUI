@@ -1,5 +1,5 @@
 import tkinter as tk
-from tkinter import messagebox, ttk
+from tkinter import messagebox, ttk, Toplevel
 import os
 import csv
 import time
@@ -8,6 +8,7 @@ import queue
 from datetime import datetime
 from pylsl import StreamInlet, resolve_stream
 from PIL import Image, ImageTk, ImageSequence
+from functools import partial
 
 # === CONFIGURACIONES === #
 STREAM_NAME = "AURA_Power"
@@ -17,24 +18,11 @@ BANDAS = ["Delta", "Theta", "Alpha", "Beta", "Gamma"]  # Bandas de frecuencia
 TOTAL_COLUMNAS = N_CANALES * len(BANDAS)  # Total de columnas de datos (8 canales x 5 bandas = 40)
 DURACION_REST = 20
 DURACION_TAREA = 20
-SUBTAREAS = [
-    ("RightArm", "Thinking"),
-    ("RightArm", "Moving"),
-    ("LeftArm", "Thinking"),
-    ("LeftArm", "Moving"),
-    ("RightFist", "Thinking"),
-    ("RightFist", "Moving"),
-    ("LeftFist", "Thinking"),
-    ("LeftFist", "Moving"),
-    ("RightFoot", "Thinking"),
-    ("RightFoot", "Moving"),
-    ("LeftFoot", "Thinking"),
-    ("LeftFoot", "Moving"),
-    ("Flecha Izquierda", "Thinking"),
-    ("Flecha Derecha", "Thinking"),
-    ("Flecha Arriba", "Thinking"),
-    ("Flecha Abajo", "Thinking")
-]
+
+# Categorías de GIFs
+ACCIONES = ["RightArm", "LeftArm", "RightFist", "LeftFist", "RightFoot", "LeftFoot"]
+FLECHAS = ["Flecha Izquierda", "Flecha Derecha", "Flecha Arriba", "Flecha Abajo"]
+EJECUCIONES = ["Thinking", "Moving"]
 
 # === VARIABLES DE CONTROL === #
 gif_jobs = []
@@ -51,6 +39,8 @@ class ExperimentController:
         self._lock = threading.Lock()
         self.connected = False
         self.inlet = None
+        # Lista personalizada para el orden de las tareas
+        self.secuencia_tareas = []
 
     def stop(self):
         with self._lock:
@@ -229,6 +219,247 @@ def capturar_datos(nombre, tarea, subtarea, duracion):
     controller.data_thread = threading.Thread(target=data_thread, daemon=True)
     controller.data_thread.start()
 
+def iniciar_configuracion_tareas():
+    nombre = entry_nombre.get().strip()
+    if not nombre:
+        messagebox.showerror("Error", "Debes ingresar un nombre")
+        return
+        
+    # Crear la ventana emergente de configuración
+    configuracion_window = Toplevel(ventana)
+    configuracion_window.title("Configuración del Experimento")
+    configuracion_window.geometry("1200x800")
+    configuracion_window.configure(bg="#002147")
+    configuracion_window.grab_set()  # Hacer que la ventana sea modal
+    
+    # Variables y funciones para drag & drop
+    drag_data = {"item": None, "tipo": None, "widget": None}
+    
+    def start_drag(event, texto, tipo):
+        drag_data["item"] = texto
+        drag_data["tipo"] = tipo
+        drag_data["widget"] = event.widget
+        
+    def drag(event):
+        pass  # La funcionalidad de arrastre visual podría implementarse aquí si se desea
+        
+    def stop_drag(event, texto, tipo):
+        # Cuando se suelta, actualizar la vista previa según el tipo
+        if tipo == "accion":
+            accion_preview.config(text=texto)
+        elif tipo == "ejecucion":
+            ejecucion_preview.config(text=texto)
+        drag_data["item"] = None
+        drag_data["tipo"] = None
+        drag_data["widget"] = None
+    
+    def agregar_a_secuencia(accion, ejecucion):
+        # Verificar que ambos campos estén completos para MI
+        if not accion or not ejecucion:
+            if accion not in FLECHAS:  # Solo validar si no es una flecha (VI)
+                messagebox.showwarning("Advertencia", "Debes seleccionar tanto una acción como un tipo de ejecución")
+                return
+        
+        # Formatear el texto para la lista
+        if accion in FLECHAS:
+            texto_tarea = f"{accion} - Visual Imagery"
+        else:
+            texto_tarea = f"{accion} - {ejecucion}"
+        
+        # Agregar a la lista y actualizar la vista
+        seq_listbox.insert(tk.END, texto_tarea)
+        # Cambiar al tab de secuencia
+        tab_control.select(tab_secuencia)
+    
+    def mover_tarea_arriba(listbox):
+        try:
+            idx = listbox.curselection()[0]
+            if idx > 0:
+                texto = listbox.get(idx)
+                listbox.delete(idx)
+                listbox.insert(idx-1, texto)
+                listbox.selection_set(idx-1)
+        except (IndexError, TypeError):
+            pass
+    
+    def mover_tarea_abajo(listbox):
+        try:
+            idx = listbox.curselection()[0]
+            if idx < listbox.size()-1:
+                texto = listbox.get(idx)
+                listbox.delete(idx)
+                listbox.insert(idx+1, texto)
+                listbox.selection_set(idx+1)
+        except (IndexError, TypeError):
+            pass
+    
+    def eliminar_tarea(listbox):
+        try:
+            idx = listbox.curselection()[0]
+            listbox.delete(idx)
+        except (IndexError, TypeError):
+            pass
+    
+    def reiniciar_secuencia(listbox):
+        if messagebox.askyesno("Reiniciar", "¿Estás seguro de querer eliminar toda la secuencia?"):
+            listbox.delete(0, tk.END)
+    
+    def guardar_e_iniciar(config_window, listbox):
+        secuencia = listbox.get(0, tk.END)
+        if not secuencia:
+            messagebox.showwarning("Advertencia", "La secuencia está vacía. Agrega al menos una tarea.")
+            return
+        
+        # Procesar la secuencia para el formato que espera el controlador
+        tareas_procesadas = []
+        for tarea in secuencia:
+            if "Visual Imagery" in tarea:
+                # Es una tarea de VI (flecha)
+                parte = tarea.split(" - ")[0]
+                tareas_procesadas.append((parte, "Thinking"))
+            else:
+                # Es una tarea de MI
+                partes = tarea.split(" - ")
+                tareas_procesadas.append((partes[0], partes[1]))
+        
+        # Guardar la secuencia en el controlador
+        controller.secuencia_tareas = tareas_procesadas
+        
+        # Cerrar la ventana de configuración
+        config_window.destroy()
+        
+        # Iniciar el experimento
+        iniciar_experimento()
+    
+    # Crear tabs para organizar mejor las tareas
+    tab_control = ttk.Notebook(configuracion_window)
+    
+    # Tab para Motor Imagery
+    tab_mi = ttk.Frame(tab_control)
+    tab_control.add(tab_mi, text="Motor Imagery")
+    
+    # Tab para Visual Imagery
+    tab_vi = ttk.Frame(tab_control)
+    tab_control.add(tab_vi, text="Visual Imagery")
+    
+    # Tab para la secuencia final
+    tab_secuencia = ttk.Frame(tab_control)
+    tab_control.add(tab_secuencia, text="Secuencia Final")
+    
+    tab_control.pack(expand=1, fill="both")
+    
+    # ====== MOTOR IMAGERY TAB ======
+    mi_frame = ttk.Frame(tab_mi, padding=20)
+    mi_frame.pack(fill=tk.BOTH, expand=True)
+    
+    ttk.Label(mi_frame, text="Tareas de Motor Imagery", font=("Arial", 16, "bold")).pack(pady=(0, 15))
+    
+    # Frame para las posibles combinaciones
+    combo_frame = ttk.Frame(mi_frame)
+    combo_frame.pack(fill=tk.BOTH, expand=True)
+    
+    # Frame izquierdo para acciones
+    left_frame = ttk.LabelFrame(combo_frame, text="Acciones", padding=10, width=200)
+    left_frame.pack(side=tk.LEFT, fill=tk.BOTH, expand=True, padx=(0, 10))
+    
+    # Frame derecho para tipos de ejecución
+    right_frame = ttk.LabelFrame(combo_frame, text="Tipos de Ejecución", padding=10, width=200)
+    right_frame.pack(side=tk.LEFT, fill=tk.BOTH, expand=True, padx=(10, 0))
+    
+    # Mostrar opciones disponibles
+    for i, accion in enumerate(ACCIONES):
+        accion_btn = ttk.Button(left_frame, text=accion, width=15)
+        accion_btn.pack(pady=5, padx=5)
+        
+        # Configurar como arrastrable
+        accion_btn.bind("<ButtonPress-1>", lambda e, texto=accion: start_drag(e, texto, "accion"))
+        accion_btn.bind("<B1-Motion>", drag)
+        accion_btn.bind("<ButtonRelease-1>", lambda e, texto=accion: stop_drag(e, texto, "accion"))
+    
+    for i, ejecucion in enumerate(EJECUCIONES):
+        ejecucion_btn = ttk.Button(right_frame, text=ejecucion, width=15)
+        ejecucion_btn.pack(pady=5, padx=5)
+        
+        # Configurar como arrastrable
+        ejecucion_btn.bind("<ButtonPress-1>", lambda e, texto=ejecucion: start_drag(e, texto, "ejecucion"))
+        ejecucion_btn.bind("<B1-Motion>", drag)
+        ejecucion_btn.bind("<ButtonRelease-1>", lambda e, texto=ejecucion: stop_drag(e, texto, "ejecucion"))
+    
+    ttk.Label(mi_frame, text="Vista previa de la combinación", font=("Arial", 14)).pack(pady=(15, 5))
+    
+    # Frame para la vista previa
+    preview_frame = ttk.Frame(mi_frame, padding=5)
+    preview_frame.pack(fill=tk.X, pady=10)
+    
+    # Etiquetas para la vista previa
+    accion_preview = ttk.Label(preview_frame, text="", width=15, background="#e0e0e0")
+    accion_preview.pack(side=tk.LEFT, padx=5)
+    
+    plus_label = ttk.Label(preview_frame, text="+", font=("Arial", 18, "bold"))
+    plus_label.pack(side=tk.LEFT, padx=5)
+    
+    ejecucion_preview = ttk.Label(preview_frame, text="", width=15, background="#e0e0e0")
+    ejecucion_preview.pack(side=tk.LEFT, padx=5)
+    
+    # Botón para agregar a la secuencia
+    add_btn = ttk.Button(mi_frame, text="Agregar a Secuencia", 
+                            command=lambda: agregar_a_secuencia(accion_preview.cget("text"), 
+                                                            ejecucion_preview.cget("text")))
+    add_btn.pack(pady=10)
+    
+    # ====== VISUAL IMAGERY TAB ======
+    vi_frame = ttk.Frame(tab_vi, padding=20)
+    vi_frame.pack(fill=tk.BOTH, expand=True)
+    
+    ttk.Label(vi_frame, text="Tareas de Visual Imagery", font=("Arial", 16, "bold")).pack(pady=(0, 15))
+    
+    # Mostrar opciones de flechas
+    for flecha in FLECHAS:
+        flecha_btn = ttk.Button(vi_frame, text=flecha, width=20)
+        flecha_btn.pack(pady=5)
+        
+        # Agregar directamente a la secuencia con VI
+        flecha_btn.config(command=lambda f=flecha: agregar_a_secuencia(f, "Thinking"))
+    
+    # ====== SECUENCIA FINAL TAB ======
+    secuencia_frame = ttk.Frame(tab_secuencia, padding=20)
+    secuencia_frame.pack(fill=tk.BOTH, expand=True)
+    
+    ttk.Label(secuencia_frame, text="Secuencia Final del Experimento", 
+              font=("Arial", 16, "bold")).pack(pady=(0, 15))
+    
+    # Frame para contener la lista y los botones de control
+    seq_control_frame = ttk.Frame(secuencia_frame)
+    seq_control_frame.pack(fill=tk.BOTH, expand=True)
+    
+    # Lista para mostrar la secuencia final
+    seq_listbox = tk.Listbox(seq_control_frame, font=("Arial", 12), height=15, 
+                           selectmode=tk.SINGLE, bg="#f0f0f0")
+    seq_listbox.pack(side=tk.LEFT, fill=tk.BOTH, expand=True, padx=(0, 10))
+    
+    # Scrollbar para la lista
+    scrollbar = ttk.Scrollbar(seq_control_frame, orient="vertical", command=seq_listbox.yview)
+    scrollbar.pack(side=tk.LEFT, fill=tk.Y)
+    seq_listbox.config(yscrollcommand=scrollbar.set)
+    
+    # Frame para los botones de control de la secuencia
+    buttons_frame = ttk.Frame(seq_control_frame)
+    buttons_frame.pack(side=tk.LEFT, fill=tk.Y, padx=(10, 0))
+    
+    # Botones para manipular la secuencia
+    ttk.Button(buttons_frame, text="↑ Subir", 
+               command=lambda: mover_tarea_arriba(seq_listbox)).pack(fill=tk.X, pady=5)
+    ttk.Button(buttons_frame, text="↓ Bajar", 
+               command=lambda: mover_tarea_abajo(seq_listbox)).pack(fill=tk.X, pady=5)
+    ttk.Button(buttons_frame, text="❌ Eliminar", 
+               command=lambda: eliminar_tarea(seq_listbox)).pack(fill=tk.X, pady=5)
+    ttk.Button(buttons_frame, text="🔄 Reiniciar", 
+               command=lambda: reiniciar_secuencia(seq_listbox)).pack(fill=tk.X, pady=5)
+    
+    # Botón para guardar la configuración e iniciar el experimento
+    ttk.Button(secuencia_frame, text="Iniciar Experimento con esta Secuencia", 
+               command=lambda: guardar_e_iniciar(configuracion_window, seq_listbox)).pack(pady=15)
+
 def iniciar_experimento():
     if controller.running:
         return
@@ -281,7 +512,32 @@ def iniciar_experimento():
                         writer.writerow([timestamp] + muestra)
                         actualizar_temporizador(int(DURACION_REST - elapsed))
                     time.sleep(0.01)
-            for parte, tipo in SUBTAREAS:
+            
+            # Usar la secuencia personalizada si está disponible
+            if controller.secuencia_tareas:
+                tareas_a_ejecutar = controller.secuencia_tareas
+            else:
+                # Fallback a la secuencia predeterminada
+                tareas_a_ejecutar = [
+                    ("RightArm", "Thinking"),
+                    ("RightArm", "Moving"),
+                    ("LeftArm", "Thinking"),
+                    ("LeftArm", "Moving"),
+                    ("RightFist", "Thinking"),
+                    ("RightFist", "Moving"),
+                    ("LeftFist", "Thinking"),
+                    ("LeftFist", "Moving"),
+                    ("RightFoot", "Thinking"),
+                    ("RightFoot", "Moving"),
+                    ("LeftFoot", "Thinking"),
+                    ("LeftFoot", "Moving"),
+                    ("Flecha Izquierda", "Thinking"),
+                    ("Flecha Derecha", "Thinking"),
+                    ("Flecha Arriba", "Thinking"),
+                    ("Flecha Abajo", "Thinking")
+                ]
+            
+            for parte, tipo in tareas_a_ejecutar:
                 instrucciones_titulo = f"{tipo.upper()}\n{parte.upper()}"
                 if tipo == "Moving":
                     if "Fist" in parte:
@@ -366,8 +622,9 @@ estado_conexion.pack(side=tk.LEFT, padx=10)
 button_frame = tk.Frame(main_frame, bg="#002147")
 button_frame.pack(pady=20)
 
-btn_comenzar = tk.Button(button_frame, text="Comenzar Experimento", font=("Arial", 28),
-                        command=iniciar_experimento, bg="#006699", fg="white")
+# Modificar el botón para que abra la ventana de configuración en lugar de iniciar directamente
+btn_comenzar = tk.Button(button_frame, text="Configurar Experimento", font=("Arial", 28),
+                        command=iniciar_configuracion_tareas, bg="#006699", fg="white")
 btn_comenzar.pack(side=tk.LEFT, padx=10)
 
 btn_pausar = tk.Button(button_frame, text="Pausar", font=("Arial", 20),
