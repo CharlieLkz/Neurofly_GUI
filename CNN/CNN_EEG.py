@@ -6,14 +6,15 @@ import torch
 import torch.nn as nn
 import torch.optim as optim
 from torch.utils.data import Dataset, DataLoader
-from sklearn.metrics import confusion_matrix, accuracy_score
+from sklearn.metrics import confusion_matrix, accuracy_score, classification_report
 from sklearn.preprocessing import StandardScaler
-from sklearn.model_selection import train_test_split
+from sklearn.model_selection import train_test_split, KFold
 import matplotlib.pyplot as plt
 import seaborn as sns
 from pathlib import Path
 import sys
 from io import StringIO
+import time
 
 # Configuración de directorios
 BASE_DIR = Path(".")
@@ -21,14 +22,40 @@ DATA_DIR = Path("../OrganizedData")
 print(f"Directorio base (script): {os.path.abspath(BASE_DIR)}")
 print(f"Directorio de datos: {os.path.abspath(DATA_DIR)}")
 GRAPHS_DIR = BASE_DIR / "graficas"
+MODELS_DIR = BASE_DIR / "models"
 
-# Crear directorio para gráficas si no existe
+# Crear directorios si no existen
 os.makedirs(GRAPHS_DIR, exist_ok=True)
+os.makedirs(MODELS_DIR, exist_ok=True)
 
-# Clase para el modelo CNN
-class EEGCNN(nn.Module):
-    def __init__(self, input_features, num_classes):
-        super(EEGCNN, self).__init__()
+# Semilla para reproducibilidad
+SEED = 42
+torch.manual_seed(SEED)
+np.random.seed(SEED)
+if torch.cuda.is_available():
+    torch.cuda.manual_seed_all(SEED)
+
+# Configuración
+CONFIG = {
+    'batch_size': 6,  # Batch más pequeño para mejor generalización
+    'learning_rate': 0.0003,  # Learning rate más bajo
+    'weight_decay': 0.0001,  # Regularización L2
+    'num_epochs': 300,  # Máximo número de épocas
+    'early_stopping_patience': 60,  # Mayor paciencia
+    'lr_scheduler_patience': 15,  # Paciencia del scheduler
+    'target_samples_per_class': 60,  # Más muestras por clase
+    'validation_size': 0.15,  # Porcentaje de datos para validación
+    'test_size': 0.15,  # Porcentaje de datos para prueba
+    'use_extra_features': True,  # Usar características derivadas
+    'use_cross_validation': True,  # Usar validación cruzada
+    'n_folds': 5,  # Número de folds para validación cruzada
+    'ensemble_models': 3,  # Número de modelos para ensemble
+}
+
+# Clase para el modelo CNN mejorado
+class EEGCNNImproved(nn.Module):
+    def __init__(self, input_features, num_classes, dropout_rate=0.2):
+        super(EEGCNNImproved, self).__init__()
         
         # Arquitectura más compleja
         self.conv1 = nn.Conv1d(input_features, 64, kernel_size=3, padding=1)
@@ -38,18 +65,30 @@ class EEGCNN(nn.Module):
         self.conv3 = nn.Conv1d(128, 128, kernel_size=3, padding=1)
         self.bn3 = nn.BatchNorm1d(128)
         
+        # Capa de atención para ponderar canales importantes
+        self.attention = nn.Sequential(
+            nn.AdaptiveAvgPool1d(1),
+            nn.Conv1d(128, 64, kernel_size=1),
+            nn.ReLU(),
+            nn.Conv1d(64, 128, kernel_size=1),
+            nn.Sigmoid()
+        )
+        
         # Capas de activación y pooling
         self.relu = nn.ReLU()
         self.pool = nn.MaxPool1d(kernel_size=2)
         
-        # Dropout para regularización (reducido)
-        self.dropout1 = nn.Dropout(0.2)
-        self.dropout2 = nn.Dropout(0.2)
+        # Dropout para regularización
+        self.dropout_rate = dropout_rate
+        self.dropout1 = nn.Dropout(dropout_rate)
+        self.dropout2 = nn.Dropout(dropout_rate)
         
         # Capas fully connected - se ajustarán dinámicamente
         self.fc1 = nn.Linear(128, 256)  # Dimensión inicial, se ajustará dinámicamente
         self.bn_fc1 = nn.BatchNorm1d(256)
-        self.fc2 = nn.Linear(256, num_classes)
+        self.fc2 = nn.Linear(256, 128)
+        self.bn_fc2 = nn.BatchNorm1d(128)
+        self.fc3 = nn.Linear(128, num_classes)
         
     def forward(self, x):
         # Aplicar primera capa convolucional con batch normalization
@@ -69,6 +108,11 @@ class EEGCNN(nn.Module):
         # Aplicar tercera capa convolucional con batch normalization
         x = self.conv3(x)
         x = self.bn3(x)
+        
+        # Aplicar mecanismo de atención
+        weights = self.attention(x)
+        x = x * weights
+        
         x = self.relu(x)
         x = self.pool(x)
         x = self.dropout1(x)
@@ -90,7 +134,14 @@ class EEGCNN(nn.Module):
         x = self.bn_fc1(x)
         x = self.relu(x)
         x = self.dropout2(x)
+        
+        # Capa adicional
         x = self.fc2(x)
+        x = self.bn_fc2(x)
+        x = self.relu(x)
+        x = self.dropout2(x)
+        
+        x = self.fc3(x)
         
         return x
 
@@ -106,12 +157,41 @@ class EEGDataset(Dataset):
     def __getitem__(self, idx):
         return self.data[idx], self.labels[idx]
 
-def load_and_preprocess_data():
+def compute_derived_features(df):
+    """
+    Calcula características derivadas a partir de las bandas de frecuencia originales
+    """
+    # Las 4 características originales
+    original_features = df.copy()
+    
+    # Relación Alpha/Beta para cada canal
+    df['Canal4_Alpha_Beta_Ratio'] = df['Canal4_Alpha'] / (df['Canal4_Beta'] + 1e-10)
+    df['Canal5_Alpha_Beta_Ratio'] = df['Canal5_Alpha'] / (df['Canal5_Beta'] + 1e-10)
+    
+    # Diferencia entre canales para cada banda
+    df['Alpha_Channel_Diff'] = df['Canal4_Alpha'] - df['Canal5_Alpha']
+    df['Beta_Channel_Diff'] = df['Canal4_Beta'] - df['Canal5_Beta']
+    
+    # Suma de poder por banda entre canales
+    df['Alpha_Power_Total'] = df['Canal4_Alpha'] + df['Canal5_Alpha']
+    df['Beta_Power_Total'] = df['Canal4_Beta'] + df['Canal5_Beta']
+    
+    # Dominancia hemisférica (proporción entre canales)
+    df['Alpha_Hemisphere_Ratio'] = df['Canal4_Alpha'] / (df['Canal5_Alpha'] + 1e-10)
+    df['Beta_Hemisphere_Ratio'] = df['Canal4_Beta'] / (df['Canal5_Beta'] + 1e-10)
+    
+    # Variación temporal (aproximación de la derivada)
+    for col in original_features.columns:
+        df[f'{col}_Diff'] = df[col].diff().fillna(0)
+    
+    return df
+
+def load_and_preprocess_data(use_extra_features=True):
     """
     Carga y preprocesa los datos de EEG desde las carpetas especificadas.
     Elimina la columna Timestamp y procesa solo los valores de BandPower.
     """
-    # Definir las clases thinking para clasificar - Reducimos a solo 2 clases
+    # Definir las clases thinking para clasificar
     thinking_classes = [
         "LeftArmThinking", 
         "RightArmThinking"
@@ -266,6 +346,10 @@ def load_and_preprocess_data():
                     print(f"    Columnas en el primer CSV: {df.columns.tolist()}")
                     print(f"    Primeras 2 filas: \n{df.head(2)}")
                 
+                # Crear características derivadas si se solicita
+                if use_extra_features:
+                    df = compute_derived_features(df)
+                
                 # Normalizar los datos dentro de cada archivo
                 scaler = StandardScaler()
                 df_normalized = pd.DataFrame(scaler.fit_transform(df), columns=df.columns)
@@ -366,6 +450,10 @@ def load_and_preprocess_data():
                     print(f"    ADVERTENCIA: El archivo {csv_file} quedó con muy pocos datos después de limpiar")
                     continue
                 
+                # Crear características derivadas si se solicita
+                if use_extra_features:
+                    df = compute_derived_features(df)
+                
                 # Normalizar los datos dentro de cada archivo
                 scaler = StandardScaler()
                 df_normalized = pd.DataFrame(scaler.fit_transform(df), columns=df.columns)
@@ -415,17 +503,348 @@ def load_and_preprocess_data():
     print(f"Forma final de X (para CNN): {X.shape}")
     
     return X, y, thinking_classes
+    
+def advanced_data_augmentation(X, y, target_samples_per_class):
+    """
+    Técnicas avanzadas de data augmentation para datos EEG
+    """
+    X_augmented = []
+    y_augmented = []
+    
+    # Contador de clases
+    class_counts = np.bincount(y)
+    print(f"Distribución original de clases: {class_counts}")
+    
+    # Augmentar datos para cada clase
+    for class_idx in np.unique(y):
+        # Índices de las muestras de esta clase
+        indices = np.where(y == class_idx)[0]
+        
+        # Añadir las muestras originales
+        for idx in indices:
+            X_augmented.append(X[idx])
+            y_augmented.append(y[idx])
+        
+        # Si hay pocas muestras, aumentarlas
+        if len(indices) < target_samples_per_class:
+            # Calcular cuántas muestras adicionales necesitamos
+            samples_to_generate = target_samples_per_class - len(indices)
+            print(f"Generando {samples_to_generate} muestras adicionales para clase {class_idx}")
+            
+            # Generar muestras adicionales con múltiples técnicas
+            for _ in range(samples_to_generate):
+                # Técnica aleatoria de augmentación
+                technique = np.random.choice(['noise', 'shift', 'mix', 'scale', 'flip'])
+                
+                if technique == 'noise':
+                    # Elegir aleatoriamente una muestra de esta clase
+                    sample_idx = np.random.choice(indices)
+                    sample = X[sample_idx].copy()
+                    
+                    # Añadir ruido gaussiano selectivo (solo a algunos canales)
+                    noise_level = np.random.uniform(0.01, 0.05)  # Nivel de ruido menor
+                    channels_to_noise = np.random.choice(sample.shape[0], 
+                                                        size=np.random.randint(1, sample.shape[0]+1),
+                                                        replace=False)
+                    
+                    noise = np.zeros_like(sample)
+                    for ch in channels_to_noise:
+                        noise[ch] = np.random.normal(0, noise_level * np.std(sample[ch]), sample[ch].shape)
+                    
+                    augmented_sample = sample + noise
+                
+                elif technique == 'shift':
+                    # Elegir aleatoriamente una muestra de esta clase
+                    sample_idx = np.random.choice(indices)
+                    sample = X[sample_idx].copy()
+                    
+                    # Desplazamiento temporal aleatorio variado por canal
+                    shifted_sample = np.zeros_like(sample)
+                    for ch in range(sample.shape[0]):
+                        shift_amount = np.random.randint(-3, 4)  # Desplazamiento entre -3 y 3
+                        if shift_amount > 0:
+                            shifted_sample[ch, shift_amount:] = sample[ch, :-shift_amount]
+                        elif shift_amount < 0:
+                            shifted_sample[ch, :shift_amount] = sample[ch, -shift_amount:]
+                        else:  # No shift
+                            shifted_sample[ch] = sample[ch]
+                    
+                    augmented_sample = shifted_sample
+                
+                elif technique == 'mix':
+                    # Mezclar dos muestras de la misma clase
+                    if len(indices) >= 2:
+                        sample_idx1, sample_idx2 = np.random.choice(indices, size=2, replace=False)
+                        sample1 = X[sample_idx1].copy()
+                        sample2 = X[sample_idx2].copy()
+                        
+                        # Mezclar con proporción aleatoria
+                        mix_ratio = np.random.uniform(0.2, 0.8)
+                        augmented_sample = sample1 * mix_ratio + sample2 * (1 - mix_ratio)
+                    else:  # Si solo hay una muestra, usar noise
+                        sample_idx = np.random.choice(indices)
+                        sample = X[sample_idx].copy()
+                        noise_level = np.random.uniform(0.01, 0.05)
+                        noise = np.random.normal(0, noise_level * np.std(sample), sample.shape)
+                        augmented_sample = sample + noise
+                
+                elif technique == 'scale':
+                    # Elegir aleatoriamente una muestra de esta clase
+                    sample_idx = np.random.choice(indices)
+                    sample = X[sample_idx].copy()
+                    
+                    # Escalar por canal con factores diferentes
+                    scaled_sample = np.zeros_like(sample)
+                    for ch in range(sample.shape[0]):
+                        scale_factor = np.random.uniform(0.8, 1.2)  # Factor de escala entre 0.8 y 1.2
+                        scaled_sample[ch] = sample[ch] * scale_factor
+                    
+                    augmented_sample = scaled_sample
+                
+                elif technique == 'flip':
+                    # Elegir aleatoriamente una muestra de esta clase
+                    sample_idx = np.random.choice(indices)
+                    sample = X[sample_idx].copy()
+                    
+                    # Voltear canales seleccionados
+                    flipped_sample = sample.copy()
+                    channels_to_flip = np.random.choice([True, False], size=sample.shape[0])
+                    
+                    for ch in range(sample.shape[0]):
+                        if channels_to_flip[ch]:
+                            flipped_sample[ch] = -sample[ch]  # Invertir señal
+                    
+                    augmented_sample = flipped_sample
+                
+                X_augmented.append(augmented_sample)
+                y_augmented.append(class_idx)
+    
+    # Convertir a arrays numpy
+    X_result = np.array(X_augmented)
+    y_result = np.array(y_augmented)
+    
+    print(f"Distribución después de augmentation: {np.bincount(y_result)}")
+    print(f"Forma de X después de augmentation: {X_result.shape}")
+    
+    return X_result, y_result
 
-def train_model(model, train_loader, val_loader, device, num_epochs=300, learning_rate=0.0005):
+def train_and_evaluate_model(X, y, config, class_names):
+    """
+    Entrena y evalúa el modelo utilizando validación cruzada si está habilitada
+    """
+    if config['use_cross_validation']:
+        return cross_validation_training(X, y, config, class_names)
+    else:
+        return single_model_training(X, y, config, class_names)
+
+def single_model_training(X, y, config, class_names):
+    """
+    Entrenamiento de un único modelo con división simple de datos
+    """
+    # Dividir datos en conjuntos de entrenamiento, validación y prueba
+    X_train_val, X_test, y_train_val, y_test = train_test_split(
+        X, y, test_size=config['test_size'], random_state=SEED, stratify=y
+    )
+    X_train, X_val, y_train, y_val = train_test_split(
+        X_train_val, y_train_val, test_size=config['validation_size'], 
+        random_state=SEED, stratify=y_train_val
+    )
+    
+    print(f"Forma de los datos de entrenamiento: {X_train.shape}")
+    print(f"Forma de los datos de validación: {X_val.shape}")
+    print(f"Forma de los datos de prueba: {X_test.shape}")
+    
+    # Crear datasets y dataloaders
+    train_dataset = EEGDataset(X_train, y_train)
+    val_dataset = EEGDataset(X_val, y_val)
+    test_dataset = EEGDataset(X_test, y_test)
+    
+    train_loader = DataLoader(train_dataset, batch_size=config['batch_size'], shuffle=True)
+    val_loader = DataLoader(val_dataset, batch_size=config['batch_size'])
+    test_loader = DataLoader(test_dataset, batch_size=config['batch_size'])
+    
+    # Determinar dispositivo (GPU si está disponible)
+    device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
+    print(f"Utilizando dispositivo: {device}")
+    
+    # Crear modelo
+    n_features, seq_len = X_train.shape[1], X_train.shape[2]
+    num_classes = len(class_names)
+    
+    model = EEGCNNImproved(n_features, num_classes).to(device)
+    print("Arquitectura del modelo:")
+    print(model)
+    
+    print("\nIniciando entrenamiento...")
+    train_losses, val_losses, val_accuracies, best_model_state = train_model(
+        model, train_loader, val_loader, device, config
+    )
+    
+    # Restaurar el mejor modelo
+    model.load_state_dict(best_model_state)
+    
+    print("\nEvaluando modelo en conjunto de prueba...")
+    test_accuracy, confusion_mat = evaluate_model(model, test_loader, device, class_names)
+    
+    # Guardar el modelo entrenado
+    if test_accuracy >= 0.80:
+        model_save_path = MODELS_DIR / f"eeg_model_{test_accuracy:.4f}.pt"
+        torch.save({
+            'model_state_dict': model.state_dict(),
+            'config': config,
+            'accuracy': test_accuracy,
+            'class_names': class_names,
+            'n_features': n_features,
+            'seq_len': seq_len
+        }, model_save_path)
+        print(f"\nModelo guardado en: {model_save_path}")
+    
+    # Visualizar curvas de pérdida y precisión
+    plot_training_metrics(train_losses, val_losses, val_accuracies)
+    
+    return model, test_accuracy, confusion_mat
+
+def cross_validation_training(X, y, config, class_names):
+    """
+    Entrena y evalúa utilizando validación cruzada para mayor robustez
+    """
+    print(f"\nIniciando entrenamiento con {config['n_folds']}-fold validación cruzada...")
+    
+    # Configurar K-Fold
+    kf = KFold(n_splits=config['n_folds'], shuffle=True, random_state=SEED)
+    fold_accuracies = []
+    fold_models = []
+    
+    # Determinar dispositivo (GPU si está disponible)
+    device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
+    print(f"Utilizando dispositivo: {device}")
+    
+    # Para cada fold
+    for fold, (train_idx, test_idx) in enumerate(kf.split(X)):
+        print(f"\n--- Fold {fold+1}/{config['n_folds']} ---")
+        
+        # Dividir los datos para este fold
+        X_train_fold, X_test_fold = X[train_idx], X[test_idx]
+        y_train_fold, y_test_fold = y[train_idx], y[test_idx]
+        
+        # Separar validación
+        X_train, X_val, y_train, y_val = train_test_split(
+            X_train_fold, y_train_fold, test_size=config['validation_size'], 
+            random_state=SEED, stratify=y_train_fold
+        )
+        
+        # Crear datasets y dataloaders
+        train_dataset = EEGDataset(X_train, y_train)
+        val_dataset = EEGDataset(X_val, y_val)
+        test_dataset = EEGDataset(X_test_fold, y_test_fold)
+        
+        train_loader = DataLoader(train_dataset, batch_size=config['batch_size'], shuffle=True)
+        val_loader = DataLoader(val_dataset, batch_size=config['batch_size'])
+        test_loader = DataLoader(test_dataset, batch_size=config['batch_size'])
+        
+        # Crear modelo para este fold
+        n_features, seq_len = X_train.shape[1], X_train.shape[2]
+        num_classes = len(class_names)
+        
+        fold_model = EEGCNNImproved(n_features, num_classes).to(device)
+        
+        # Entrenar modelo
+        _, _, _, best_state = train_model(
+            fold_model, train_loader, val_loader, device, config
+        )
+        
+        # Cargar el mejor estado del modelo
+        fold_model.load_state_dict(best_state)
+        
+        # Evaluar en el conjunto de prueba
+        fold_acc, _ = evaluate_model(
+            fold_model, test_loader, device, class_names
+        )
+        
+        print(f"Fold {fold+1} Accuracy: {fold_acc:.4f}")
+        fold_accuracies.append(fold_acc)
+        fold_models.append((fold_model, fold_acc))
+    
+    # Métricas globales
+    mean_acc = np.mean(fold_accuracies)
+    std_acc = np.std(fold_accuracies)
+    print(f"\nValidación cruzada completa:")
+    print(f"Accuracy promedio: {mean_acc:.4f} ± {std_acc:.4f}")
+    
+    # Seleccionar el mejor modelo
+    best_model_idx = np.argmax(fold_accuracies)
+    best_model, best_acc = fold_models[best_model_idx]
+    
+    # Guardar el mejor modelo
+    if best_acc >= 0.80:
+        model_save_path = MODELS_DIR / f"eeg_model_cv_best_{best_acc:.4f}.pt"
+        torch.save({
+            'model_state_dict': best_model.state_dict(),
+            'config': config,
+            'accuracy': best_acc,
+            'class_names': class_names,
+            'cross_validation_mean': mean_acc,
+            'cross_validation_std': std_acc,
+            'n_features': n_features,
+            'seq_len': seq_len
+        }, model_save_path)
+        print(f"\nMejor modelo guardado en: {model_save_path}")
+    
+    # Evaluar todos los modelos en todo el conjunto
+    if config['ensemble_models'] > 1:
+        # Ordenar modelos por precisión y tomar los mejores n
+        top_models = sorted(fold_models, key=lambda x: x[1], reverse=True)[:config['ensemble_models']]
+        ensemble_model_list = [model for model, _ in top_models]
+        
+        # Crear dataset de todo el conjunto
+        full_dataset = EEGDataset(X, y)
+        full_loader = DataLoader(full_dataset, batch_size=config['batch_size'])
+        
+        # Evaluar ensemble
+        ensemble_acc = evaluate_ensemble(ensemble_model_list, full_loader, device, class_names)
+        print(f"\nEnsemble de {config['ensemble_models']} modelos:")
+        print(f"Accuracy global: {ensemble_acc:.4f}")
+        
+        # Guardar modelos ensemble
+        ensemble_dir = MODELS_DIR / f"ensemble_{time.strftime('%Y%m%d_%H%M%S')}"
+        os.makedirs(ensemble_dir, exist_ok=True)
+        
+        for i, (model, acc) in enumerate(top_models[:config['ensemble_models']]):
+            model_save_path = ensemble_dir / f"model_{i+1}_{acc:.4f}.pt"
+            torch.save({
+                'model_state_dict': model.state_dict(),
+                'config': config,
+                'accuracy': acc,
+                'class_names': class_names,
+                'n_features': n_features,
+                'seq_len': seq_len
+            }, model_save_path)
+        
+        print(f"Ensemble guardado en: {ensemble_dir}")
+        
+        return ensemble_model_list, ensemble_acc, None
+    
+    return best_model, best_acc, None
+
+def train_model(model, train_loader, val_loader, device, config):
     """
     Entrena el modelo CNN con los datos proporcionados.
     """
     # Definir función de pérdida y optimizador
     criterion = nn.CrossEntropyLoss()
-    optimizer = optim.Adam(model.parameters(), lr=learning_rate, weight_decay=0.0001)  # Reducir L2 regularización
+    optimizer = optim.Adam(
+        model.parameters(), 
+        lr=config['learning_rate'], 
+        weight_decay=config['weight_decay']
+    )
     
-    # Learning rate scheduler - más suave
-    scheduler = optim.lr_scheduler.ReduceLROnPlateau(optimizer, 'min', patience=15, factor=0.7, verbose=True)
+    # Learning rate scheduler
+    scheduler = optim.lr_scheduler.ReduceLROnPlateau(
+        optimizer, 'min', 
+        patience=config['lr_scheduler_patience'], 
+        factor=0.7, 
+        verbose=True
+    )
     
     # Listas para almacenar métricas durante el entrenamiento
     train_losses = []
@@ -434,12 +853,11 @@ def train_model(model, train_loader, val_loader, device, num_epochs=300, learnin
     
     # Para early stopping
     best_val_accuracy = 0
-    patience = 50  # Aumentar paciencia significativamente
     counter = 0
     best_model_state = None
     
     # Entrenamiento del modelo
-    for epoch in range(num_epochs):
+    for epoch in range(config['num_epochs']):
         # Modo entrenamiento
         model.train()
         train_loss = 0.0
@@ -498,7 +916,7 @@ def train_model(model, train_loader, val_loader, device, num_epochs=300, learnin
         
         # Imprimir progreso cada 10 épocas
         if (epoch + 1) % 10 == 0:
-            print(f"Época {epoch+1}/{num_epochs}, "
+            print(f"Época {epoch+1}/{config['num_epochs']}, "
                   f"Pérdida entrenamiento: {train_loss:.4f}, "
                   f"Pérdida validación: {val_loss:.4f}, "
                   f"Precisión validación: {val_accuracy:.2f}%")
@@ -511,16 +929,15 @@ def train_model(model, train_loader, val_loader, device, num_epochs=300, learnin
             print(f"Nueva mejor precisión: {val_accuracy:.2f}% (Época {epoch+1})")
         else:
             counter += 1
-            if counter >= patience:
+            if counter >= config['early_stopping_patience']:
                 print(f"Early stopping en época {epoch+1}")
                 break
     
     # Restaurar el mejor modelo
     if best_model_state is not None:
-        model.load_state_dict(best_model_state)
         print(f"Restaurado el mejor modelo con precisión de validación: {best_val_accuracy:.2f}%")
     
-    return train_losses, val_losses, val_accuracies
+    return train_losses, val_losses, val_accuracies, best_model_state
 
 def evaluate_model(model, test_loader, device, class_names):
     """
@@ -547,7 +964,7 @@ def evaluate_model(model, test_loader, device, class_names):
     accuracy = accuracy_score(all_labels, all_predictions)
     
     # Crear gráfica de la matriz de confusión
-    plt.figure(figsize=(12, 10))
+    plt.figure(figsize=(10, 8))
     sns.heatmap(cm, annot=True, fmt='d', cmap='Blues', xticklabels=class_names, yticklabels=class_names)
     plt.xlabel('Predicción')
     plt.ylabel('Verdadero')
@@ -558,141 +975,115 @@ def evaluate_model(model, test_loader, device, class_names):
     plt.savefig(GRAPHS_DIR / "confusion_matrix.png")
     plt.close()
     
+    # Mostrar reporte de clasificación detallado
+    print("\nReporte de clasificación:")
+    print(classification_report(all_labels, all_predictions, target_names=class_names))
+    
     return accuracy, cm
 
-def analyze_performance_and_suggest_improvements(accuracy, train_losses, val_losses):
+def evaluate_ensemble(models, data_loader, device, class_names):
     """
-    Analiza el rendimiento del modelo y sugiere mejoras si la precisión es baja.
+    Evalúa un conjunto de modelos mediante votación
     """
-    print("\n=== ANÁLISIS DE RENDIMIENTO ===")
-    print(f"Accuracy global: {accuracy:.4f} ({accuracy*100:.2f}%)")
+    all_predictions = []
+    all_labels = []
     
-    # Determinar si la accuracy es baja
-    if accuracy < 0.8:  # Aumentamos el umbral a 80%
-        print("\nLa accuracy es BAJA. Sugerencias para mejorar el modelo:")
-        
-        # Analizar posible sobreajuste o subajuste
-        is_overfit = (train_losses[-1] < val_losses[-1] * 0.7)
-        is_underfit = (train_losses[-1] > val_losses[-1] * 0.9)
-        
-        if is_overfit:
-            print("- El modelo muestra signos de sobreajuste (overfitting):")
-            print("  * Aumentar regularización (incrementar dropout a 0.4-0.5)")
-            print("  * Reducir complejidad del modelo (menos capas o filtros)")
-            print("  * Aplicar más técnicas de data augmentation")
-        elif is_underfit:
-            print("- El modelo muestra signos de subajuste (underfitting):")
-            print("  * Aumentar complejidad del modelo (más capas o filtros)")
-            print("  * Disminuir regularización (reducir dropout a 0.1)")
-            print("  * Entrenar por más épocas o con learning rate más alto inicialmente")
-        
-        # Sugerencias generales sobre hiperparámetros
-        print("\nAjustes recomendados en hiperparámetros:")
-        if accuracy < 0.6:
-            print("- Learning rate: Probar con un rango de valores (0.001 - 0.0001)")
-            print("- Arquitectura: Considerar modelos más simples o más complejos")
-            print("- Preprocesamiento: Usar técnicas adicionales como filtrado de frecuencias")
-        else:
-            print("- Fine-tuning: Pequeños ajustes en la arquitectura actual")
-            print("- Regularización: Ajustar batch normalization y weight decay")
-            print("- Augmentación: Técnicas más sofisticadas de data augmentation")
-    else:
-        print("\nLa accuracy es BUENA, se puede considerar:")
-        print("- Guardar el modelo para uso en producción")
-        print("- Probar en datos completamente nuevos para verificar generalización")
-        print("- Implementar técnicas de interpretabilidad para entender qué patrones ha aprendido")
+    with torch.no_grad():
+        for inputs, labels in data_loader:
+            inputs, labels = inputs.to(device), labels.to(device)
+            
+            # Predicciones de cada modelo
+            model_predictions = []
+            for model in models:
+                model.eval()
+                outputs = model(inputs)
+                _, predicted = torch.max(outputs.data, 1)
+                model_predictions.append(predicted.cpu().numpy())
+            
+            # Votación por mayoría
+            ensemble_predictions = np.stack(model_predictions)
+            final_predictions = []
+            
+            for i in range(len(labels)):
+                # Contar predicciones para cada muestra
+                counts = np.bincount(ensemble_predictions[:, i])
+                # La predicción final es la más votada
+                final_predictions.append(np.argmax(counts))
+            
+            all_predictions.extend(final_predictions)
+            all_labels.extend(labels.cpu().numpy())
     
+    # Calcular precisión
+    accuracy = accuracy_score(all_labels, all_predictions)
+    
+    # Crear matriz de confusión
+    cm = confusion_matrix(all_labels, all_predictions)
+    
+    # Crear gráfica de la matriz de confusión
+    plt.figure(figsize=(10, 8))
+    sns.heatmap(cm, annot=True, fmt='d', cmap='Blues', xticklabels=class_names, yticklabels=class_names)
+    plt.xlabel('Predicción')
+    plt.ylabel('Verdadero')
+    plt.title(f'Matriz de Confusión (Ensemble) - Accuracy: {accuracy:.4f}')
+    
+    # Guardar la gráfica
+    plt.tight_layout()
+    plt.savefig(GRAPHS_DIR / "confusion_matrix_ensemble.png")
+    plt.close()
+    
+    return accuracy
+
+def plot_training_metrics(train_losses, val_losses, val_accuracies):
+    """
+    Visualiza las métricas de entrenamiento
+    """
     # Visualizar curvas de pérdida
-    plt.figure(figsize=(10, 6))
+    plt.figure(figsize=(12, 5))
+    plt.subplot(1, 2, 1)
     plt.plot(train_losses, label='Pérdida de entrenamiento')
     plt.plot(val_losses, label='Pérdida de validación')
     plt.title('Curvas de Pérdida durante Entrenamiento')
     plt.xlabel('Época')
     plt.ylabel('Pérdida')
     plt.legend()
-    plt.savefig(GRAPHS_DIR / "loss_curves.png")
-    plt.close()
     
-    print(f"\nLas gráficas se han guardado en la carpeta: {GRAPHS_DIR}")
+    # Visualizar curva de precisión
+    plt.subplot(1, 2, 2)
+    plt.plot(val_accuracies, label='Precisión de validación')
+    plt.title('Precisión durante Entrenamiento')
+    plt.xlabel('Época')
+    plt.ylabel('Precisión (%)')
+    plt.ylim([0, 105])
+    plt.legend()
+    
+    # Guardar la gráfica
+    plt.tight_layout()
+    plt.savefig(GRAPHS_DIR / "training_metrics.png")
+    plt.close()
 
 def main():
     """
     Función principal que ejecuta todo el proceso.
     """
-    print("Cargando y preprocesando datos...")
+    print("Iniciando clasificación avanzada de EEG...")
+    print(f"Configuración: {CONFIG}")
+    
     try:
-        X, y, class_names = load_and_preprocess_data()
+        # Cargar y preprocesar datos
+        print("Cargando y preprocesando datos...")
+        X, y, class_names = load_and_preprocess_data(use_extra_features=CONFIG['use_extra_features'])
         
-        # Verificamos que tenemos suficientes datos
+        # Verificar que tenemos suficientes datos
         if len(X) < 10:
             print("ERROR: No hay suficientes datos para entrenar el modelo.")
             sys.exit(1)
-            
-        # Data augmentation - generar más muestras para balancear el conjunto
-        X_augmented = []
-        y_augmented = []
         
-        # Contador de clases
-        class_counts = np.bincount(y)
-        print(f"Distribución original de clases: {class_counts}")
+        # Data augmentation
+        print("Aplicando técnicas avanzadas de augmentación de datos...")
+        X, y = advanced_data_augmentation(X, y, CONFIG['target_samples_per_class'])
         
-        # Determinar la clase con más ejemplos
-        max_samples = max(class_counts)
-        target_samples = max(max_samples, 50)  # Aumentar a 50 muestras mínimo por clase
-        
-        # Augmentar datos para cada clase
-        for class_idx in range(len(class_names)):
-            # Índices de las muestras de esta clase
-            indices = np.where(y == class_idx)[0]
-            
-            # Añadir las muestras originales
-            for idx in indices:
-                X_augmented.append(X[idx])
-                y_augmented.append(y[idx])
-            
-            # Si hay pocas muestras, aumentarlas
-            if len(indices) < target_samples:
-                # Calcular cuántas muestras adicionales necesitamos
-                samples_to_generate = target_samples - len(indices)
-                print(f"Generando {samples_to_generate} muestras adicionales para clase {class_names[class_idx]}")
-                
-                # Generar muestras adicionales (con técnicas avanzadas)
-                for _ in range(samples_to_generate):
-                    # Elegir aleatoriamente una muestra de esta clase
-                    sample_idx = np.random.choice(indices)
-                    sample = X[sample_idx].copy()
-                    
-                    # Técnica de augmentación: mezcla de ruido y desplazamiento temporal
-                    # Añadir ruido gaussiano
-                    noise_level = np.random.uniform(0.02, 0.06)  # Reducir nivel de ruido
-                    noise = np.random.normal(0, noise_level * np.std(sample), sample.shape)
-                    
-                    # Desplazamiento temporal aleatorio (shift)
-                    shift_amount = np.random.randint(-2, 3)  # Desplazar -2 a 2 posiciones
-                    if shift_amount != 0:
-                        shifted_sample = np.zeros_like(sample)
-                        if shift_amount > 0:
-                            shifted_sample[:, shift_amount:] = sample[:, :-shift_amount]
-                        else:
-                            shifted_sample[:, :shift_amount] = sample[:, -shift_amount:]
-                        sample = shifted_sample
-                    
-                    # Aplicar ruido a la muestra desplazada
-                    augmented_sample = sample + noise
-                    
-                    X_augmented.append(augmented_sample)
-                    y_augmented.append(class_idx)
-        
-        # Convertir a arrays numpy
-        X = np.array(X_augmented)
-        y = np.array(y_augmented)
-        
-        print(f"Distribución después de augmentation: {np.bincount(y)}")
-        print(f"Forma de X después de augmentation: {X.shape}")
-        
-        # Aplicar Feature Scaling a nivel global - más efectivo
+        # Aplicar Feature Scaling a nivel global
         print("Aplicando normalización avanzada...")
-        # Reshape para normalizar a nivel de características entre todas las muestras
         n_samples, n_features, seq_len = X.shape
         X_reshaped = X.reshape(n_samples, n_features * seq_len)
         
@@ -703,63 +1094,31 @@ def main():
         # Volver a la forma original
         X = X_normalized.reshape(n_samples, n_features, seq_len)
         
-        # Dividir datos en conjuntos de entrenamiento, validación y prueba - más datos para entrenamiento
-        X_train_val, X_test, y_train_val, y_test = train_test_split(X, y, test_size=0.15, random_state=42, stratify=y)
-        X_train, X_val, y_train, y_val = train_test_split(X_train_val, y_train_val, test_size=0.15, random_state=42, stratify=y_train_val)
+        # Entrenar y evaluar el modelo
+        model, accuracy, _ = train_and_evaluate_model(X, y, CONFIG, class_names)
         
-        print(f"Forma de los datos de entrenamiento: {X_train.shape}")
-        print(f"Forma de los datos de validación: {X_val.shape}")
-        print(f"Forma de los datos de prueba: {X_test.shape}")
+        # Análisis final
+        print("\n=== ANÁLISIS DE RENDIMIENTO FINAL ===")
+        print(f"Accuracy global: {accuracy:.4f} ({accuracy*100:.2f}%)")
         
-        # Crear datasets y dataloaders
-        train_dataset = EEGDataset(X_train, y_train)
-        val_dataset = EEGDataset(X_val, y_val)
-        test_dataset = EEGDataset(X_test, y_test)
+        if accuracy >= 0.95:
+            print("\n¡Excelente! El modelo ha alcanzado una precisión muy alta (≥95%).")
+            print("Recomendaciones para el siguiente paso:")
+            print("1. Probar con más clases (incluir Fist y Foot)")
+            print("2. Evaluar el modelo con datos completamente nuevos")
+            print("3. Implementar un sistema en tiempo real utilizando este modelo")
+        elif accuracy >= 0.90:
+            print("\nMuy buena precisión (≥90%). Posibles mejoras adicionales:")
+            print("1. Fine-tuning de hiperparámetros")
+            print("2. Aumentar aún más el conjunto de datos")
+            print("3. Probar técnicas de ensemble más sofisticadas")
+        else:
+            print("\nBuena precisión pero aún se puede mejorar:")
+            print("1. Recolectar más datos de ejemplo")
+            print("2. Probar arquitecturas alternativas (LSTM, Transformer)")
+            print("3. Incrementar complejidad del modelo o ajustar regularización")
         
-        batch_size = 8  # Batch más pequeño para mejor aprendizaje
-        train_loader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True)
-        val_loader = DataLoader(val_dataset, batch_size=batch_size)
-        test_loader = DataLoader(test_dataset, batch_size=batch_size)
-        
-        # Determinar dispositivo (GPU si está disponible)
-        device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
-        print(f"Utilizando dispositivo: {device}")
-        
-        # Crear modelo
-        n_features, seq_len = X_train.shape[1], X_train.shape[2]
-        num_classes = len(class_names)
-        
-        model = EEGCNN(n_features, num_classes).to(device)
-        print("Arquitectura del modelo:")
-        print(model)
-        
-        print("\nIniciando entrenamiento...")
-        num_epochs = 300
-        learning_rate = 0.0005
-        train_losses, val_losses, val_accuracies = train_model(
-            model, train_loader, val_loader, device, 
-            num_epochs=num_epochs, learning_rate=learning_rate
-        )
-        
-        print("\nEvaluando modelo en conjunto de prueba...")
-        accuracy, _ = evaluate_model(model, test_loader, device, class_names)
-        
-        analyze_performance_and_suggest_improvements(accuracy, train_losses, val_losses)
-        
-        # Guardar el modelo si la precisión es buena
-        if accuracy >= 0.8:
-            model_save_path = GRAPHS_DIR / "eeg_model.pt"
-            torch.save({
-                'model_state_dict': model.state_dict(),
-                'accuracy': accuracy,
-                'class_names': class_names,
-                'n_features': n_features,
-                'seq_len': seq_len
-            }, model_save_path)
-            print(f"\nModelo guardado en: {model_save_path}")
-        
-        print("\nProceso completo. Las gráficas han sido guardadas en la carpeta:")
-        print(f"{GRAPHS_DIR}")
+        print("\nProceso completo. Las gráficas y modelos han sido guardados.")
         
     except Exception as e:
         print(f"ERROR GENERAL: {str(e)}")
@@ -768,4 +1127,6 @@ def main():
         sys.exit(1)
 
 if __name__ == "__main__":
+    start_time = time.time()
     main()
+    print(f"\nTiempo total de ejecución: {(time.time() - start_time)/60:.2f} minutos")
