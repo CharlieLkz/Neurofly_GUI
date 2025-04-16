@@ -6,7 +6,7 @@ import time
 import threading
 import queue
 from datetime import datetime
-from pylsl import StreamInlet, resolve_stream
+from pylsl import StreamInlet, resolve_streams
 from PIL import Image, ImageTk, ImageSequence
 from functools import partial
 
@@ -64,7 +64,7 @@ class ExperimentController:
                 start_time = time.time()
                 while time.time() - start_time < timeout and not self.connected:
                     try:
-                        streams = resolve_stream('name', STREAM_NAME)
+                        streams = resolve_streams('name', STREAM_NAME)
                         if streams:
                             self.inlet = StreamInlet(streams[0])
                             with self._lock:
