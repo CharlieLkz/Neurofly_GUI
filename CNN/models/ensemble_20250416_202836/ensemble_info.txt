@@ -1,0 +1,12 @@
+Ensemble creado: 2025-04-16 20:28:36
+Accuracy global: 0.9719
+Accuracy por clase:
+  - LeftArmThinking: 0.9500
+  - RightArmThinking: 0.9500
+  - LeftFistThinking: 0.9875
+  - RightFistThinking: 1.0000
+
+Modelos incluidos:
+  - Modelo 1: 0.8438
+  - Modelo 2: 0.8281
+  - Modelo 3: 0.8125
