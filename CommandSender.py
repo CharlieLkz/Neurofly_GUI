@@ -244,18 +244,31 @@ class LSLCommandReceiver:
         # Contador de intentos de reconexión
         self.reconnect_attempts = 0
         self.max_reconnect_attempts = 10
+        self.last_reconnect_time = 0
+        self.reconnect_interval = 5  # segundos
     
     def connect(self):
         """
-        Conecta al stream LSL de comandos.
+        Conecta al stream LSL de comandos de forma no bloqueante.
         
         Returns:
             bool: True si la conexión fue exitosa
         """
         try:
+            # Si ya estamos conectados, no hacer nada
+            if self.connected and self.inlet:
+                return True
+                
+            # Si ha pasado poco tiempo desde el último intento, no reintentar
+            current_time = time.time()
+            if current_time - self.last_reconnect_time < self.reconnect_interval:
+                return False
+            
+            self.last_reconnect_time = current_time
             logger.info(f"Buscando stream LSL '{INPUT_STREAM_NAME}'...")
             
-            streams = resolve_byprop('name', INPUT_STREAM_NAME, timeout=LSL_SEARCH_TIMEOUT)
+            # Buscar streams con un timeout corto
+            streams = resolve_byprop('name', INPUT_STREAM_NAME, timeout=1.0)
             
             if not streams:
                 logger.warning(f"No se encontró el stream '{INPUT_STREAM_NAME}'")
@@ -263,12 +276,7 @@ class LSLCommandReceiver:
             
             self.inlet = StreamInlet(streams[0])
             self.connected = True
-            
-            # Leer una muestra para verificar la conexión
-            sample, timestamp = self.inlet.pull_sample(timeout=1.0)
-            if sample:
-                logger.info(f"Conexión al stream LSL verificada: {sample}")
-            
+            logger.info("Conectado al stream LSL")
             return True
             
         except Exception as e:
@@ -279,16 +287,10 @@ class LSLCommandReceiver:
     def start_listening(self):
         """
         Inicia la escucha de comandos en un hilo separado.
-        
-        Returns:
-            bool: True si se inició correctamente
+        No bloquea si no hay conexión.
         """
         if self.running:
             return True
-        
-        if not self.connected:
-            if not self.connect():
-                return False
         
         self.running = True
         self.thread = threading.Thread(target=self._listen_loop)
@@ -301,53 +303,46 @@ class LSLCommandReceiver:
     def stop_listening(self):
         """
         Detiene la escucha de comandos.
-        
-        Returns:
-            bool: True si se detuvo correctamente
         """
         self.running = False
         
         if self.thread and self.thread.is_alive():
             self.thread.join(timeout=1.0)
         
+        self.connected = False
+        self.inlet = None
         logger.info("Detenida escucha de comandos LSL")
         return True
     
     def _listen_loop(self):
         """
         Bucle principal de escucha de comandos.
+        Maneja reconexiones de forma no bloqueante.
         """
-        last_reconnect_time = 0
-        reconnect_interval = 5  # segundos
-        
         while self.running:
             try:
-                if self.connected and self.inlet:
-                    # Intentar recibir un comando
-                    sample, timestamp = self.inlet.pull_sample(timeout=0.1)
-                    
-                    if sample:
-                        # Si se recibió una muestra y hay un callback registrado, notificar
-                        if self.on_command_received:
-                            self.on_command_received(sample[0], timestamp)
-                else:
-                    # Si no está conectado, intentar reconectar periódicamente
-                    current_time = time.time()
-                    if current_time - last_reconnect_time > reconnect_interval:
-                        if self.reconnect_attempts < self.max_reconnect_attempts:
-                            logger.info(f"Intentando reconectar al stream LSL (intento {self.reconnect_attempts + 1})")
-                            if self.connect():
-                                logger.info("Reconexión exitosa")
-                                self.reconnect_attempts = 0
-                            else:
-                                self.reconnect_attempts += 1
-                        last_reconnect_time = current_time
-            
+                # Si no estamos conectados, intentar conectar
+                if not self.connected or not self.inlet:
+                    if self.connect():
+                        self.reconnect_attempts = 0
+                    else:
+                        self.reconnect_attempts += 1
+                        time.sleep(0.5)  # Pequeña pausa antes de reintentar
+                        continue
+                
+                # Intentar recibir un comando con timeout corto
+                sample, timestamp = self.inlet.pull_sample(timeout=0.1)
+                
+                if sample:
+                    # Si se recibió una muestra y hay un callback registrado, notificar
+                    if self.on_command_received:
+                        self.on_command_received(sample[0], timestamp)
+                
             except Exception as e:
                 logger.error(f"Error en bucle de escucha: {str(e)}")
-                # Si ocurre un error, marcar como desconectado
                 self.connected = False
-                time.sleep(1.0)  # Pequeña pausa para no saturar la CPU
+                self.inlet = None
+                time.sleep(0.5)
             
             # Pequeña pausa para no saturar la CPU
             time.sleep(0.01)
@@ -379,15 +374,14 @@ class CommandSenderApp:
         self.target_class = StringVar(value="")
         self.led_state = StringVar(value="OFF")
         self.status_text = StringVar(value="Desconectado")
-        self.detect_status = StringVar(value="No detectado")
+        self.detect_status = StringVar(value="Esperando conexión LSL...")
         self.port_var = StringVar(value="")
+        self.lsl_status = StringVar(value="Desconectado")
         
         # Variables de control
         self.last_detected_class = ""
         self.last_detection_time = 0
-        self.detection_active = False  # Para habilitar/deshabilitar la detección
-        
-        # Lista de clases disponibles (se actualizará al recibir el primer comando)
+        self.detection_active = False
         self.available_classes = []
         
         # Crear interfaz
@@ -397,7 +391,7 @@ class CommandSenderApp:
         self.update_port_list()
         self.update_status()
         
-        # Iniciar escucha de comandos LSL
+        # Iniciar escucha de comandos LSL en segundo plano
         self.lsl_receiver.start_listening()
         
         # Actualizar interfaz periódicamente
@@ -407,6 +401,14 @@ class CommandSenderApp:
         """
         Crea los widgets de la interfaz.
         """
+        # === SECCIÓN DE ESTADO LSL === #
+        lsl_frame = ttk.LabelFrame(self.root, text="Estado LSL", padding=10)
+        lsl_frame.pack(fill=tk.X, padx=10, pady=5)
+        
+        ttk.Label(lsl_frame, text="Stream LSL:").pack(side=tk.LEFT, padx=5)
+        self.lsl_status_label = ttk.Label(lsl_frame, textvariable=self.lsl_status)
+        self.lsl_status_label.pack(side=tk.LEFT, padx=5)
+        
         # === SECCIÓN DE CONEXIÓN ESP32 === #
         conn_frame = ttk.LabelFrame(self.root, text="Conexión ESP32", padding=10)
         conn_frame.pack(fill=tk.X, padx=10, pady=10, ipady=5)
@@ -420,7 +422,7 @@ class CommandSenderApp:
         self.port_combo = ttk.Combobox(port_frame, textvariable=self.port_var, width=15)
         self.port_combo.pack(side=tk.LEFT, padx=(0, 5))
         
-        ttk.Button(port_frame, text="⟳", width=3, command=self.update_port_list).pack(side=tk.LEFT)
+        ttk.Button(port_frame, text="⟳", width=3, command=self.update_port_list).pack(side=tk.LEFT, padx=5)
         
         ttk.Label(conn_frame, text="Baudrate:").grid(row=0, column=2, sticky=tk.W, padx=5, pady=5)
         
@@ -729,22 +731,30 @@ class CommandSenderApp:
         """
         Actualiza la interfaz periódicamente.
         """
-        # Verificar conexión ESP32
-        if self.esp.connected and not self.esp.serial:
-            # La conexión se perdió
-            self.esp.connected = False
-            self.update_status()
-            self.connect_btn.config(state=tk.NORMAL)
-            self.disconnect_btn.config(state=tk.DISABLED)
-            self.log_message("Conexión con ESP32 perdida")
+        try:
+            # Verificar conexión ESP32
+            if self.esp.connected and not self.esp.serial:
+                self.esp.connected = False
+                self.update_status()
+                self.connect_btn.config(state=tk.NORMAL)
+                self.disconnect_btn.config(state=tk.DISABLED)
+                self.log_message("Conexión con ESP32 perdida")
+            
+            # Actualizar estado LSL
+            if self.lsl_receiver.connected:
+                self.lsl_status.set("Conectado")
+                self.lsl_status_label.configure(foreground="green")
+            else:
+                self.lsl_status.set("Esperando stream...")
+                self.lsl_status_label.configure(foreground="orange")
+            
+            # Si la detección está activa pero no hay conexión LSL
+            if self.detection_active and not self.lsl_receiver.connected:
+                self.detect_status.set("Esperando conexión LSL...")
+                self.detect_label.configure(background="#fff3cd")  # Amarillo suave
         
-        # Verificar conexión LSL
-        if not self.lsl_receiver.connected:
-            # Intentar reconectar si no está ya intentándolo
-            if self.lsl_receiver.reconnect_attempts == 0:
-                self.log_message("Intentando conectar al stream LSL...")
-                if self.lsl_receiver.connect():
-                    self.log_message("Conexión al stream LSL establecida")
+        except Exception as e:
+            logger.error(f"Error al actualizar UI: {str(e)}")
         
         # Programar la próxima actualización
         self.root.after(1000, self.update_ui)

@@ -44,7 +44,7 @@ logger = logging.getLogger("EEGProcessor")
 
 # === CONFIGURACIONES === #
 # Nombres de streams LSL
-INPUT_STREAM_NAME = "AURAPSD"        # Stream de entrada (desde GUI)
+INPUT_STREAM_NAME = "AURA_Power"        # Stream de entrada (desde GUI)
 OUTPUT_STREAM_NAME = "FEATURE_STREAM"  # Stream de salida (hacia CNN)
 
 # Configuración de bandas de frecuencia (Hz)

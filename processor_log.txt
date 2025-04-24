@@ -1,0 +1,86 @@
+2025-04-24 16:48:08,136 - EEGProcessor - INFO - Buscando stream LSL 'AURAPSD'...
+2025-04-24 16:48:13,152 - EEGProcessor - WARNING - No se encontró el stream 'AURAPSD', reintentando (1)...
+2025-04-24 16:48:34,626 - EEGProcessor - INFO - Buscando stream LSL 'AURAPSD'...
+2025-04-24 16:48:39,663 - EEGProcessor - WARNING - No se encontró el stream 'AURAPSD', reintentando (1)...
+2025-04-24 16:48:48,434 - EEGProcessor - INFO - Buscando stream LSL 'AURAPSD'...
+2025-04-24 16:48:53,461 - EEGProcessor - WARNING - No se encontró el stream 'AURAPSD', reintentando (1)...
+2025-04-24 16:49:42,892 - EEGProcessor - INFO - Buscando stream LSL 'AURAPSD'...
+2025-04-24 16:49:47,921 - EEGProcessor - WARNING - No se encontró el stream 'AURAPSD', reintentando (1)...
+2025-04-24 18:55:17,657 - EEGProcessor - INFO - Buscando stream LSL 'AURAPSD'...
+2025-04-24 18:55:22,680 - EEGProcessor - WARNING - No se encontró el stream 'AURAPSD', reintentando (1)...
+2025-04-24 18:55:43,503 - EEGProcessor - INFO - Buscando stream LSL 'AURAPSD'...
+2025-04-24 18:55:48,518 - EEGProcessor - WARNING - No se encontró el stream 'AURAPSD', reintentando (1)...
+2025-04-24 18:58:17,089 - EEGProcessor - INFO - Buscando stream LSL 'AURA_Power'...
+2025-04-24 18:58:22,106 - EEGProcessor - WARNING - No se encontró el stream 'AURA_Power', reintentando (1)...
+2025-04-24 19:02:21,484 - EEGProcessor - INFO - Buscando stream LSL 'AURA_Power'...
+2025-04-24 19:02:21,496 - EEGProcessor - INFO - Conectado al stream 'AURA_Power'
+2025-04-24 19:02:21,497 - EEGProcessor - INFO - Metadatos extraídos del stream de entrada
+2025-04-24 19:02:21,500 - EEGProcessor - INFO - Stream de salida 'FEATURE_STREAM' configurado con 40 características
+2025-04-24 19:02:21,500 - EEGProcessor - INFO - Muestra de prueba enviada al stream de salida
+2025-04-24 19:02:21,562 - EEGProcessor - INFO - Conexión verificada: Primeras muestras recibidas
+2025-04-24 19:03:07,990 - EEGProcessor - INFO - Buscando stream LSL 'AURA_Power'...
+2025-04-24 19:03:07,999 - EEGProcessor - INFO - Conectado al stream 'AURA_Power'
+2025-04-24 19:03:07,999 - EEGProcessor - INFO - Metadatos extraídos del stream de entrada
+2025-04-24 19:03:08,003 - EEGProcessor - INFO - Stream de salida 'FEATURE_STREAM' configurado con 40 características
+2025-04-24 19:03:08,003 - EEGProcessor - INFO - Muestra de prueba enviada al stream de salida
+2025-04-24 19:03:08,140 - EEGProcessor - INFO - Conexión verificada: Primeras muestras recibidas
+2025-04-24 19:04:39,376 - EEGProcessor - INFO - Buscando stream LSL 'AURA_Power'...
+2025-04-24 19:04:39,386 - EEGProcessor - INFO - Conectado al stream 'AURA_Power'
+2025-04-24 19:04:39,386 - EEGProcessor - INFO - Metadatos extraídos del stream de entrada
+2025-04-24 19:04:39,389 - EEGProcessor - INFO - Stream de salida 'FEATURE_STREAM' configurado con 40 características
+2025-04-24 19:04:39,389 - EEGProcessor - INFO - Muestra de prueba enviada al stream de salida
+2025-04-24 19:04:39,509 - EEGProcessor - INFO - Conexión verificada: Primeras muestras recibidas
+2025-04-24 19:10:22,490 - EEGProcessor - INFO - Buscando stream LSL 'AURA_Power'...
+2025-04-24 19:10:22,499 - EEGProcessor - INFO - Conectado al stream 'AURA_Power'
+2025-04-24 19:10:22,499 - EEGProcessor - INFO - Metadatos extraídos del stream de entrada
+2025-04-24 19:10:22,502 - EEGProcessor - INFO - Stream de salida 'FEATURE_STREAM' configurado con 40 características
+2025-04-24 19:10:22,503 - EEGProcessor - INFO - Muestra de prueba enviada al stream de salida
+2025-04-24 19:10:22,606 - EEGProcessor - INFO - Conexión verificada: Primeras muestras recibidas
+2025-04-24 19:12:21,271 - EEGProcessor - INFO - Buscando stream LSL 'AURA_Power'...
+2025-04-24 19:12:21,284 - EEGProcessor - INFO - Conectado al stream 'AURA_Power'
+2025-04-24 19:12:21,284 - EEGProcessor - INFO - Metadatos extraídos del stream de entrada
+2025-04-24 19:12:21,291 - EEGProcessor - INFO - Stream de salida 'FEATURE_STREAM' configurado con 40 características
+2025-04-24 19:12:21,292 - EEGProcessor - INFO - Muestra de prueba enviada al stream de salida
+2025-04-24 19:12:21,442 - EEGProcessor - INFO - Conexión verificada: Primeras muestras recibidas
+2025-04-24 19:12:54,197 - EEGProcessor - INFO - Buscando stream LSL 'AURA_Power'...
+2025-04-24 19:12:54,212 - EEGProcessor - INFO - Conectado al stream 'AURA_Power'
+2025-04-24 19:12:54,213 - EEGProcessor - INFO - Metadatos extraídos del stream de entrada
+2025-04-24 19:12:54,218 - EEGProcessor - INFO - Stream de salida 'FEATURE_STREAM' configurado con 40 características
+2025-04-24 19:12:54,219 - EEGProcessor - INFO - Muestra de prueba enviada al stream de salida
+2025-04-24 19:12:54,298 - EEGProcessor - INFO - Conexión verificada: Primeras muestras recibidas
+2025-04-24 19:13:34,448 - EEGProcessor - INFO - Buscando stream LSL 'AURA_Power'...
+2025-04-24 19:13:34,464 - EEGProcessor - INFO - Conectado al stream 'AURA_Power'
+2025-04-24 19:13:34,464 - EEGProcessor - INFO - Metadatos extraídos del stream de entrada
+2025-04-24 19:13:34,469 - EEGProcessor - INFO - Stream de salida 'FEATURE_STREAM' configurado con 40 características
+2025-04-24 19:13:34,470 - EEGProcessor - INFO - Muestra de prueba enviada al stream de salida
+2025-04-24 19:13:34,540 - EEGProcessor - INFO - Conexión verificada: Primeras muestras recibidas
+2025-04-24 19:16:30,009 - EEGProcessor - INFO - Buscando stream LSL 'AURA_Power'...
+2025-04-24 19:16:30,024 - EEGProcessor - INFO - Conectado al stream 'AURA_Power'
+2025-04-24 19:16:30,025 - EEGProcessor - INFO - Metadatos extraídos del stream de entrada
+2025-04-24 19:16:30,031 - EEGProcessor - INFO - Stream de salida 'FEATURE_STREAM' configurado con 40 características
+2025-04-24 19:16:30,031 - EEGProcessor - INFO - Muestra de prueba enviada al stream de salida
+2025-04-24 19:16:30,112 - EEGProcessor - INFO - Conexión verificada: Primeras muestras recibidas
+2025-04-24 19:20:00,933 - EEGProcessor - INFO - Buscando stream LSL 'AURA_Power'...
+2025-04-24 19:20:00,949 - EEGProcessor - INFO - Conectado al stream 'AURA_Power'
+2025-04-24 19:20:00,950 - EEGProcessor - INFO - Metadatos extraídos del stream de entrada
+2025-04-24 19:20:00,957 - EEGProcessor - INFO - Stream de salida 'FEATURE_STREAM' configurado con 40 características
+2025-04-24 19:20:00,957 - EEGProcessor - INFO - Muestra de prueba enviada al stream de salida
+2025-04-24 19:20:01,040 - EEGProcessor - INFO - Conexión verificada: Primeras muestras recibidas
+2025-04-24 19:25:28,041 - EEGProcessor - INFO - Buscando stream LSL 'AURA_Power'...
+2025-04-24 19:25:28,062 - EEGProcessor - INFO - Conectado al stream 'AURA_Power'
+2025-04-24 19:25:28,063 - EEGProcessor - INFO - Metadatos extraídos del stream de entrada
+2025-04-24 19:25:28,073 - EEGProcessor - INFO - Stream de salida 'FEATURE_STREAM' configurado con 40 características
+2025-04-24 19:25:28,074 - EEGProcessor - INFO - Muestra de prueba enviada al stream de salida
+2025-04-24 19:25:28,160 - EEGProcessor - INFO - Conexión verificada: Primeras muestras recibidas
+2025-04-24 19:27:18,589 - EEGProcessor - INFO - Buscando stream LSL 'AURA_Power'...
+2025-04-24 19:27:18,606 - EEGProcessor - INFO - Conectado al stream 'AURA_Power'
+2025-04-24 19:27:18,606 - EEGProcessor - INFO - Metadatos extraídos del stream de entrada
+2025-04-24 19:27:18,613 - EEGProcessor - INFO - Stream de salida 'FEATURE_STREAM' configurado con 40 características
+2025-04-24 19:27:18,613 - EEGProcessor - INFO - Muestra de prueba enviada al stream de salida
+2025-04-24 19:27:18,925 - EEGProcessor - INFO - Conexión verificada: Primeras muestras recibidas
+2025-04-24 19:30:01,868 - EEGProcessor - INFO - Buscando stream LSL 'AURA_Power'...
+2025-04-24 19:30:01,882 - EEGProcessor - INFO - Conectado al stream 'AURA_Power'
+2025-04-24 19:30:01,882 - EEGProcessor - INFO - Metadatos extraídos del stream de entrada
+2025-04-24 19:30:01,888 - EEGProcessor - INFO - Stream de salida 'FEATURE_STREAM' configurado con 40 características
+2025-04-24 19:30:01,888 - EEGProcessor - INFO - Muestra de prueba enviada al stream de salida
+2025-04-24 19:30:02,038 - EEGProcessor - INFO - Conexión verificada: Primeras muestras recibidas
