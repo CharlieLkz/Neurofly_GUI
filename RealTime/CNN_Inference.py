@@ -53,8 +53,8 @@ class RobustEEGCNNMulticlass(nn.Module):
         # Configuración por defecto
         if config is None:
             config = {
-                'hidden_dim': 128,  # Reducido para manejar entrada más pequeña
-                'channels': [32, 64, 128],  # Canales ajustados
+                'hidden_dim': 384,  # Ajustado para coincidir con el modelo entrenado
+                'channels': [64, 128, 192],  # Canales ajustados para coincidir
                 'dropout_rate': 0.25,
                 'attention_mechanism': True
             }
@@ -62,8 +62,8 @@ class RobustEEGCNNMulticlass(nn.Module):
         # Parámetros de la arquitectura
         self.in_channels = in_channels  # 4 canales de entrada
         self.n_classes = n_classes
-        self.hidden_dim = config.get('hidden_dim', 128)
-        self.channels = config.get('channels', [32, 64, 128])
+        self.hidden_dim = config.get('hidden_dim', 384)  # Ajustado
+        self.channels = config.get('channels', [64, 128, 192])  # Ajustado
         self.dropout_rate = config.get('dropout_rate', 0.25)
         self.use_attention = config.get('attention_mechanism', True)
         
@@ -71,18 +71,12 @@ class RobustEEGCNNMulticlass(nn.Module):
         # Input: (batch_size, 4, 55)
         self.conv1 = nn.Conv1d(self.in_channels, self.channels[0], kernel_size=3, padding=1)
         self.bn1 = nn.BatchNorm1d(self.channels[0])
-        # Después de conv1: (batch_size, 32, 55)
-        # Después de maxpool: (batch_size, 32, 27)
         
         self.conv2 = nn.Conv1d(self.channels[0], self.channels[1], kernel_size=3, padding=1)
         self.bn2 = nn.BatchNorm1d(self.channels[1])
-        # Después de conv2: (batch_size, 64, 27)
-        # Después de maxpool: (batch_size, 64, 13)
         
         self.conv3 = nn.Conv1d(self.channels[1], self.channels[2], kernel_size=3, padding=1)
         self.bn3 = nn.BatchNorm1d(self.channels[2])
-        # Después de conv3: (batch_size, 128, 13)
-        # Después de maxpool: (batch_size, 128, 6)
         
         # Mecanismo de atención (opcional)
         if self.use_attention:
@@ -95,7 +89,7 @@ class RobustEEGCNNMulticlass(nn.Module):
         
         # Calcular tamaño de entrada para fc1
         # Después de 3 capas de maxpool: 55 -> 27 -> 13 -> 6
-        self.fc1_in_features = self.channels[2] * 6  # 128 * 6 = 768
+        self.fc1_in_features = self.channels[2] * 6  # 192 * 6 = 1152
         
         # Capas fully connected con BatchNorm
         self.fc1 = nn.Linear(self.fc1_in_features, self.hidden_dim)
@@ -114,24 +108,24 @@ class RobustEEGCNNMulticlass(nn.Module):
             x = x.transpose(1, 2)  # Cambiar de (batch, 55, 4) a (batch, 4, 55)
         
         # Primera capa convolucional
-        x = self.conv1(x)  # (batch, 32, 55)
+        x = self.conv1(x)  # (batch, 64, 55)
         x = self.bn1(x)
         x = torch.relu(x)
-        x = torch.max_pool1d(x, 2)  # (batch, 32, 27)
+        x = torch.max_pool1d(x, 2)  # (batch, 64, 27)
         x = self.dropout1(x)
         
         # Segunda capa convolucional
-        x = self.conv2(x)  # (batch, 64, 27)
+        x = self.conv2(x)  # (batch, 128, 27)
         x = self.bn2(x)
         x = torch.relu(x)
-        x = torch.max_pool1d(x, 2)  # (batch, 64, 13)
+        x = torch.max_pool1d(x, 2)  # (batch, 128, 13)
         x = self.dropout1(x)
         
         # Tercera capa convolucional
-        x = self.conv3(x)  # (batch, 128, 13)
+        x = self.conv3(x)  # (batch, 192, 13)
         x = self.bn3(x)
         x = torch.relu(x)
-        x = torch.max_pool1d(x, 2)  # (batch, 128, 6)
+        x = torch.max_pool1d(x, 2)  # (batch, 192, 6)
         x = self.dropout1(x)
         
         # Mecanismo de atención
@@ -140,15 +134,15 @@ class RobustEEGCNNMulticlass(nn.Module):
             x = x * attention_weights
         
         # Aplanar para capas fully connected
-        x = x.view(x.size(0), -1)  # (batch, 128 * 6 = 768)
+        x = x.view(x.size(0), -1)  # (batch, 192 * 6 = 1152)
         
         # Capas fully connected
-        x = self.fc1(x)  # (batch, 128)
+        x = self.fc1(x)  # (batch, 384)
         x = self.bn_fc1(x)
         x = torch.relu(x)
         x = self.dropout2(x)
         
-        x = self.fc2(x)  # (batch, 64)
+        x = self.fc2(x)  # (batch, 192)
         x = self.bn_fc2(x)
         x = torch.relu(x)
         x = self.dropout2(x)
@@ -180,8 +174,8 @@ class CNNInference:
         self.default_config = {
             'in_channels': 4,
             'n_classes': 4,
-            'hidden_dim': 128,
-            'channels': [32, 64, 128],
+            'hidden_dim': 384,
+            'channels': [64, 128, 192],
             'dropout_rate': 0.25,
             'attention_mechanism': True
         }

@@ -17,13 +17,18 @@ import sys
 from pylsl import StreamInlet, resolve_byprop
 from djitellopy import Tello
 import traceback
+import csv
+from datetime import datetime
 
 # === Configuración de rutas y logs === #
 BASE_DIR = Path(__file__).parent.resolve()
 LOGS_DIR = BASE_DIR / "logs"
 LOGS_DIR.mkdir(exist_ok=True)
 LOG_FILE = LOGS_DIR / "command_sender_log.txt"
+SESSION_LOGS_DIR = LOGS_DIR / "sessions"
+SESSION_LOGS_DIR.mkdir(exist_ok=True)
 
+# Configurar logging
 logging.basicConfig(
     level=logging.INFO,
     format="%(asctime)s %(levelname)s %(message)s",
@@ -48,7 +53,7 @@ COMMAND_MAP = {
     'LeftArmThinking': 'flip_back',
     'RightFistThinking': 'forward 30',
     'LeftFistThinking': 'land',
-    'StartSequence': 'sequence'  # Nueva clase para iniciar la secuencia completa
+    'StartSequence': 'sequence'
 }
 
 # Estado del drone
@@ -61,15 +66,23 @@ drone_state = {
 
 class DroneController:
     def __init__(self):
-        self.drone = Tello()
         self.running = True
         self.max_retries = 3
-        self.retry_delay = 2  # segundos entre reintentos
+        self.retry_delay = 2
         self.connected = False
         self.last_activity = time.time()
         self.inactivity_monitor = None
         self.command_queue = queue.Queue()
         self.command_thread = None
+        
+        # Crear socket UDP
+        self.sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        self.sock.bind(('', LOCAL_PORT))
+        self.sock.settimeout(5.0)
+        
+        # Inicializar CSV de sesión
+        self.session_start = datetime.now()
+        self.session_csv = self._init_session_log()
         
         # Estadísticas
         self.stats = {
@@ -81,24 +94,47 @@ class DroneController:
             'max_latency': float('-inf')
         }
     
+    def _init_session_log(self):
+        """Inicializa el archivo CSV para la sesión actual"""
+        timestamp = self.session_start.strftime("%Y%m%d_%H%M%S")
+        csv_path = SESSION_LOGS_DIR / f"session_{timestamp}.csv"
+        
+        with open(csv_path, 'w', newline='') as f:
+            writer = csv.writer(f)
+            writer.writerow([
+                'timestamp',
+                'predicted_class',
+                'command_sent',
+                'response',
+                'status',
+                'latency_ms',
+                'battery_level'
+            ])
+        
+        return csv_path
+    
+    def _log_command(self, predicted_class, command, response, status, latency_ms, battery_level):
+        """Registra un comando en el CSV de sesión"""
+        with open(self.session_csv, 'a', newline='') as f:
+            writer = csv.writer(f)
+            writer.writerow([
+                datetime.now().isoformat(),
+                predicted_class,
+                command,
+                response,
+                status,
+                latency_ms,
+                battery_level
+            ])
+    
     def connect(self):
         """Intenta conectar con el dron con reintentos y validación"""
         for attempt in range(self.max_retries):
             try:
                 logging.info(f"Intento de conexión {attempt + 1}/{self.max_retries}")
                 
-                # Intentar conectar
-                self.drone.connect()
-                
-                # Verificar batería
-                battery = self.drone.get_battery()
-                logging.info(f"Nivel de batería: {battery}%")
-                if battery < 10:
-                    logging.error("Batería demasiado baja para operar")
-                    return False
-                
-                # Activar modo SDK y verificar respuesta
-                response = self.drone.send_command_with_return("command")
+                # Enviar comando 'command' y esperar respuesta
+                response = self.send_command('command')
                 if response != 'ok':
                     logging.error("No se pudo activar el modo SDK")
                     if attempt < self.max_retries - 1:
@@ -107,20 +143,14 @@ class DroneController:
                         continue
                     return False
                 
-                # Verificación adicional de conectividad
-                try:
-                    # Intentar obtener altura (comando simple que requiere respuesta)
-                    height = self.drone.get_height()
-                    if height is None:
-                        raise Exception("No se pudo obtener altura del dron")
-                    logging.info(f"Altura actual: {height}cm")
-                except Exception as e:
-                    logging.error(f"Error en verificación de conectividad: {str(e)}")
-                    if attempt < self.max_retries - 1:
-                        logging.info(f"Reintentando en {self.retry_delay} segundos...")
-                        time.sleep(self.retry_delay)
-                        continue
-                    return False
+                # Verificar batería
+                battery = self.send_command('battery?')
+                if battery and battery.isdigit():
+                    battery_level = int(battery)
+                    logging.info(f"Nivel de batería: {battery_level}%")
+                    if battery_level < 10:
+                        logging.error("Batería demasiado baja para operar")
+                        return False
                 
                 self.connected = True
                 logging.info("Conexión exitosa con el dron")
@@ -150,28 +180,45 @@ class DroneController:
         """Procesa los comandos de la cola"""
         while self.running:
             try:
-                command = self.command_queue.get(timeout=1.0)
-                if command:
+                command_data = self.command_queue.get(timeout=1.0)
+                if command_data:
+                    predicted_class, command = command_data
                     start_time = time.time()
                     
-                    # Verificar batería antes de cada comando
-                    battery = self.drone.get_battery()
-                    self.stats['battery_levels'].append(battery)
+                    # Verificar batería
+                    battery = self.send_command('battery?')
+                    battery_level = int(battery) if battery and battery.isdigit() else None
                     
-                    if battery < 10:
+                    if battery_level is not None and battery_level < 10:
                         logging.error("Batería demasiado baja para ejecutar comandos")
+                        self._log_command(predicted_class, command, None, 'FAIL', 0, battery_level)
                         self.stats['commands_failed'] += 1
                         continue
                     
                     # Ejecutar comando
                     response = self.send_command(command)
                     
+                    # Calcular latencia
+                    latency_ms = (time.time() - start_time) * 1000
+                    
+                    # Determinar estado
+                    status = 'ACK' if response == 'ok' else 'FAIL'
+                    
+                    # Registrar en CSV
+                    self._log_command(
+                        predicted_class,
+                        command,
+                        response,
+                        status,
+                        latency_ms,
+                        battery_level
+                    )
+                    
                     # Actualizar estadísticas
-                    latency = time.time() - start_time
                     self.stats['commands_sent'] += 1
-                    self.stats['latency_sum'] += latency
-                    self.stats['min_latency'] = min(self.stats['min_latency'], latency)
-                    self.stats['max_latency'] = max(self.stats['max_latency'], latency)
+                    self.stats['latency_sum'] += latency_ms
+                    self.stats['min_latency'] = min(self.stats['min_latency'], latency_ms)
+                    self.stats['max_latency'] = max(self.stats['max_latency'], latency_ms)
                     
                     # Log periódico de estadísticas
                     if self.stats['commands_sent'] % 10 == 0:
@@ -192,39 +239,41 @@ class DroneController:
             logging.info("\nEstadísticas de comandos:")
             logging.info(f"  Comandos enviados: {self.stats['commands_sent']}")
             logging.info(f"  Comandos fallidos: {self.stats['commands_failed']}")
-            logging.info(f"  Latencia promedio: {avg_latency:.3f}s")
-            logging.info(f"  Latencia mínima: {self.stats['min_latency']:.3f}s")
-            logging.info(f"  Latencia máxima: {self.stats['max_latency']:.3f}s")
+            logging.info(f"  Latencia promedio: {avg_latency:.1f}ms")
+            logging.info(f"  Latencia mínima: {self.stats['min_latency']:.1f}ms")
+            logging.info(f"  Latencia máxima: {self.stats['max_latency']:.1f}ms")
             logging.info(f"  Batería promedio: {avg_battery:.1f}%")
     
     def send_command(self, command, wait=0):
-        """Envía un comando al dron con verificación"""
-        if not self.connected:
+        """Envía un comando al dron y espera respuesta"""
+        if not self.connected and command != 'command':
             logging.error("No hay conexión con el dron")
-            return 'error'
-        
+            return None
+            
         try:
-            # Actualizar última actividad
+            # Enviar comando
+            self.sock.sendto(command.encode(), TELLO_ADDRESS)
+            
+            # Esperar respuesta
+            response, _ = self.sock.recvfrom(1024)
+            response = response.decode().strip().lower()
+            
+            # Actualizar tiempo de última actividad
             self.last_activity = time.time()
             
-            # Verificar estado de conexión antes de enviar
-            battery = self.drone.get_battery()
-            if battery < 10:
-                logging.error("Batería demasiado baja para ejecutar comandos")
-                return 'error'
-            
-            # Enviar comando
-            response = self.drone.send_command_with_return(command)
-            if response != 'ok':
-                logging.error(f"Error al ejecutar comando {command}: {response}")
-            else:
-                logging.info(f"Comando ejecutado: {command}")
-                time.sleep(wait)
+            # Para el comando 'command', aceptar tanto 'ok' como 'OK'
+            if command == 'command' and response in ['ok', 'ok']:
+                self.connected = True
+                return 'ok'
+                
             return response
             
+        except socket.timeout:
+            logging.error(f"Timeout al enviar comando: {command}")
+            return None
         except Exception as e:
-            logging.error(f"Error al enviar comando: {str(e)}")
-            return 'error'
+            logging.error(f"Error al enviar comando {command}: {str(e)}")
+            return None
     
     def queue_command(self, command):
         """Añade un comando a la cola de procesamiento"""
@@ -313,7 +362,7 @@ class DroneController:
         self.running = False
         if self.connected:
             try:
-                self.drone.land()
+                self.send_command('land', wait=10)
             except:
                 pass
             self.connected = False

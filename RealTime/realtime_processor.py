@@ -351,81 +351,36 @@ class EEGProcessor:
             logger.info(f"Latencia: min={self.latency_stats['min']:.3f}s, max={self.latency_stats['max']:.3f}s, avg={avg_latency:.3f}s")
     
     def send_batch(self):
-        """
-        Envía un batch completo de 55 muestras y guarda en CSV.
-        Reformatea los datos para que sean compatibles con el modelo CNN.
-        """
-        if len(self.batch_buffer) >= BATCH_SIZE:
-            try:
-                # Convertir buffer a numpy array (forma inicial: 55 muestras x 4 características)
-                batch_array = np.array(self.batch_buffer[:BATCH_SIZE], dtype=np.float32)
+        """Envía un batch completo de características a través de LSL"""
+        try:
+            if len(self.batch_buffer) < BATCH_SIZE:
+                return
+            
+            # Convertir deque a lista para slicing
+            batch_list = list(self.batch_buffer)
+            batch_data = batch_list[:BATCH_SIZE]
+            
+            # Convertir a numpy array y transponer para obtener la forma correcta
+            batch_array = np.array(batch_data).T  # Forma: (4, 55)
+            
+            # Aplanar el array para enviarlo por LSL
+            flattened_data = batch_array.flatten()
+            
+            # Enviar datos
+            self.outlet.push_sample(flattened_data)
+            self.features_sent += 1
+            
+            # Limpiar el buffer manteniendo solo las muestras sobrantes
+            self.batch_buffer = deque(batch_list[BATCH_SIZE:], maxlen=BATCH_SIZE)
+            
+            if DEBUG_MODE:
+                logger.debug(f"Batch enviado: {flattened_data.shape}")
+                logger.debug(f"Forma del batch: {batch_array.shape}")
+                logger.debug(f"Valores min/max: {np.min(flattened_data):.3f}/{np.max(flattened_data):.3f}")
                 
-                # Guardar en CSV en formato original (55 muestras x 4 características)
-                timestamp = time.strftime("%Y%m%d-%H%M%S")
-                csv_path = FILTERED_DATA_DIR / f"features_batch_{timestamp}.csv"
-                np.savetxt(csv_path, batch_array, delimiter=',', header=','.join(COLUMNAS_SALIDA), comments='')
-                
-                # Reformatear para CNN: cambiar de (55, 4) a (4, 55)
-                # Transponer para obtener (4, 55)
-                transposed_array = batch_array.T
-                
-                if DEBUG_MODE:
-                    # Diagnóstico de forma de datos
-                    logger.info(f"Forma de batch original: {batch_array.shape}")
-                    logger.info(f"Forma de batch transpuesto: {transposed_array.shape}")
-                
-                    # Crear versión para visualizar (1, 4, 55)
-                    cnn_ready = np.expand_dims(transposed_array, axis=0)
-                    logger.info(f"Forma final para CNN: {cnn_ready.shape}")
-                
-                    # Guardar diagnóstico
-                    diag_path = DIAGNOSTICS_DIR / f"cnn_input_shape_{timestamp}.txt"
-                    with open(diag_path, 'w') as f:
-                        f.write(f"Forma de batch original: {batch_array.shape}\n")
-                        f.write(f"Forma de batch transpuesto: {transposed_array.shape}\n")
-                        f.write(f"Forma final para CNN: {cnn_ready.shape}\n")
-                        f.write(f"Valores de la primera fila: {batch_array[0]}\n")
-                        f.write(f"Valores de primera columna (transpuesto): {transposed_array[0][:5]}...\n")
-                
-                # Aplanar el array para LSL (convertir a 1D)
-                # LSL no maneja arrays multidimensionales, así que aplanamos el array
-                flattened_data = transposed_array.flatten()
-                
-                # Verificar que todos los valores sean números válidos
-                for i, val in enumerate(flattened_data):
-                    if not np.isfinite(val):  # Detectar NaN o Inf
-                        logger.warning(f"Valor no finito detectado en posición {i}: {val}, reemplazado por 0.0")
-                        flattened_data[i] = 0.0
-                
-                # Asegurar que tenemos el número correcto de valores
-                expected_values = len(CANALES_SALIDA) * len(BANDAS_SALIDA) * BATCH_SIZE
-                if len(flattened_data) != expected_values:
-                    logger.warning(f"Número incorrecto de valores: {len(flattened_data)} vs {expected_values} esperados")
-                    
-                    # Si faltan valores, rellenar con ceros
-                    if len(flattened_data) < expected_values:
-                        padding = np.zeros(expected_values - len(flattened_data), dtype=np.float32)
-                        flattened_data = np.concatenate([flattened_data, padding])
-                    # Si hay demasiados valores, truncar
-                    else:
-                        flattened_data = flattened_data[:expected_values]
-                
-                # Convertir a lista para compatibilidad con LSL
-                flattened_list = flattened_data.tolist()
-                
-                # Enviar todo el array aplanado de una vez
-                self.outlet.push_sample(flattened_list)
-                
-                # Registrar éxito en log
-                logger.info(f"Batch enviado correctamente y guardado: {csv_path}")
-                
-                # Limpiar buffer (mantener muestras extra si hay)
-                self.batch_buffer = self.batch_buffer[BATCH_SIZE:]
-                self.features_sent += 1
-                
-            except Exception as e:
-                logger.error(f"Error al enviar batch: {str(e)}")
-                logger.error(traceback.format_exc())
+        except Exception as e:
+            logger.error(f"Error al enviar batch: {str(e)}")
+            logger.error(traceback.format_exc())
     
     def run(self):
         """Ejecuta el bucle principal con manejo robusto de errores"""

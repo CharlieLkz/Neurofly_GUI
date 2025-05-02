@@ -1,5 +1,0 @@
-Forma de batch original: (55, 4)
-Forma de batch transpuesto: (4, 55)
-Forma final para CNN: (1, 4, 55)
-Valores de la primera fila: [0.15679546 1.04970872 4.9573102  1.10277307]
-Valores de primera columna (transpuesto): [0.15679546 0.15620935 0.15856466 0.16254297 0.16603898]...
