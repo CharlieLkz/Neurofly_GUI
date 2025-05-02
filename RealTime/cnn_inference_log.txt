@@ -1,0 +1,107 @@
+2025-04-30 13:24:48,277 - INFO - Iniciando CNN_Inference...
+2025-04-30 13:24:48,278 - INFO - Directorio actual: C:\Users\cbaer\OneDrive\Desktop\Osaka Project\Neurofly_GUI\RealTime
+2025-04-30 13:24:48,278 - INFO - ==================================================
+2025-04-30 13:24:48,279 - INFO - Iniciando CNNInference...
+2025-04-30 13:24:48,279 - INFO - Directorio de trabajo actual: C:\Users\cbaer\OneDrive\Desktop\Osaka Project\Neurofly_GUI\RealTime
+2025-04-30 13:24:48,279 - INFO - Directorio del script: C:\Users\cbaer\OneDrive\Desktop\Osaka Project\Neurofly_GUI\RealTime
+2025-04-30 13:24:48,280 - INFO - Dispositivo seleccionado: cpu
+2025-04-30 13:24:48,280 - INFO - Directorio base: C:\Users\cbaer\OneDrive\Desktop\Osaka Project\Neurofly_GUI\RealTime
+2025-04-30 13:24:48,281 - INFO - Directorio de modelos: C:\Users\cbaer\OneDrive\Desktop\Osaka Project\Neurofly_GUI\RealTime\CNNModels
+2025-04-30 13:24:48,281 - INFO - ¿Existe directorio de modelos? True
+2025-04-30 13:24:49,898 - INFO - Clase EEGCNNMulticlass importada correctamente
+2025-04-30 13:24:49,900 - INFO - Modelo seleccionado: model_1_0.8438.pt  (accuracy=0.8438)
+2025-04-30 13:24:49,901 - INFO - Modelo seleccionado: model_1_0.8438.pt
+2025-04-30 13:24:49,901 - INFO - Intentando cargar modelo desde: C:\Users\cbaer\OneDrive\Desktop\Osaka Project\Neurofly_GUI\RealTime\CNNModels\models\ensemble_20250416_202836\model_1_0.8438.pt
+2025-04-30 13:24:49,901 - INFO - Ruta absoluta: C:\Users\cbaer\OneDrive\Desktop\Osaka Project\Neurofly_GUI\RealTime\CNNModels\models\ensemble_20250416_202836\model_1_0.8438.pt
+2025-04-30 13:24:49,902 - INFO - Tamaño del archivo de modelo: 1403990 bytes
+2025-04-30 13:24:49,911 - INFO - Checkpoint cargado en memoria
+2025-04-30 13:24:49,911 - INFO - Analizando checkpoint...
+2025-04-30 13:24:49,911 - INFO - Claves en el checkpoint: ['model_state_dict', 'config', 'accuracy', 'class_names', 'n_features', 'seq_len']
+2025-04-30 13:24:49,912 - INFO - 
+Análisis del state_dict:
+2025-04-30 13:24:49,912 - INFO -   - conv1.weight: shape=torch.Size([64, 20, 3]), dtype=torch.float32
+2025-04-30 13:24:49,912 - INFO -   - conv1.bias: shape=torch.Size([64]), dtype=torch.float32
+2025-04-30 13:24:49,912 - INFO -   - bn1.weight: shape=torch.Size([64]), dtype=torch.float32
+2025-04-30 13:24:49,913 - INFO -   - bn1.bias: shape=torch.Size([64]), dtype=torch.float32
+2025-04-30 13:24:49,913 - INFO -   - bn1.running_mean: shape=torch.Size([64]), dtype=torch.float32
+2025-04-30 13:24:49,913 - INFO -   - bn1.running_var: shape=torch.Size([64]), dtype=torch.float32
+2025-04-30 13:24:49,914 - INFO -   - bn1.num_batches_tracked: shape=torch.Size([]), dtype=torch.int64
+2025-04-30 13:24:49,914 - INFO -   - conv2.weight: shape=torch.Size([128, 64, 3]), dtype=torch.float32
+2025-04-30 13:24:49,914 - INFO -   - conv2.bias: shape=torch.Size([128]), dtype=torch.float32
+2025-04-30 13:24:49,914 - INFO -   - bn2.weight: shape=torch.Size([128]), dtype=torch.float32
+2025-04-30 13:24:49,915 - INFO -   - bn2.bias: shape=torch.Size([128]), dtype=torch.float32
+2025-04-30 13:24:49,915 - INFO -   - bn2.running_mean: shape=torch.Size([128]), dtype=torch.float32
+2025-04-30 13:24:49,915 - INFO -   - bn2.running_var: shape=torch.Size([128]), dtype=torch.float32
+2025-04-30 13:24:49,915 - INFO -   - bn2.num_batches_tracked: shape=torch.Size([]), dtype=torch.int64
+2025-04-30 13:24:49,915 - INFO -   - conv3.weight: shape=torch.Size([192, 128, 3]), dtype=torch.float32
+2025-04-30 13:24:49,916 - INFO -   - conv3.bias: shape=torch.Size([192]), dtype=torch.float32
+2025-04-30 13:24:49,916 - INFO -   - bn3.weight: shape=torch.Size([192]), dtype=torch.float32
+2025-04-30 13:24:49,916 - INFO -   - bn3.bias: shape=torch.Size([192]), dtype=torch.float32
+2025-04-30 13:24:49,916 - INFO -   - bn3.running_mean: shape=torch.Size([192]), dtype=torch.float32
+2025-04-30 13:24:49,916 - INFO -   - bn3.running_var: shape=torch.Size([192]), dtype=torch.float32
+2025-04-30 13:24:49,917 - INFO -   - bn3.num_batches_tracked: shape=torch.Size([]), dtype=torch.int64
+2025-04-30 13:24:49,917 - INFO -   - attention.1.weight: shape=torch.Size([48, 192, 1]), dtype=torch.float32
+2025-04-30 13:24:49,917 - INFO -   - attention.1.bias: shape=torch.Size([48]), dtype=torch.float32
+2025-04-30 13:24:49,918 - INFO -   - attention.3.weight: shape=torch.Size([192, 48, 1]), dtype=torch.float32
+2025-04-30 13:24:49,918 - INFO -   - attention.3.bias: shape=torch.Size([192]), dtype=torch.float32
+2025-04-30 13:24:49,918 - INFO -   - fc1.weight: shape=torch.Size([384, 384]), dtype=torch.float32
+2025-04-30 13:24:49,918 - INFO -   - fc1.bias: shape=torch.Size([384]), dtype=torch.float32
+2025-04-30 13:24:49,918 - INFO -   - bn_fc1.weight: shape=torch.Size([384]), dtype=torch.float32
+2025-04-30 13:24:49,919 - INFO -   - bn_fc1.bias: shape=torch.Size([384]), dtype=torch.float32
+2025-04-30 13:24:49,919 - INFO -   - bn_fc1.running_mean: shape=torch.Size([384]), dtype=torch.float32
+2025-04-30 13:24:49,919 - INFO -   - bn_fc1.running_var: shape=torch.Size([384]), dtype=torch.float32
+2025-04-30 13:24:49,920 - INFO -   - bn_fc1.num_batches_tracked: shape=torch.Size([]), dtype=torch.int64
+2025-04-30 13:24:49,920 - INFO -   - fc2.weight: shape=torch.Size([192, 384]), dtype=torch.float32
+2025-04-30 13:24:49,920 - INFO -   - fc2.bias: shape=torch.Size([192]), dtype=torch.float32
+2025-04-30 13:24:49,920 - INFO -   - bn_fc2.weight: shape=torch.Size([192]), dtype=torch.float32
+2025-04-30 13:24:49,921 - INFO -   - bn_fc2.bias: shape=torch.Size([192]), dtype=torch.float32
+2025-04-30 13:24:49,921 - INFO -   - bn_fc2.running_mean: shape=torch.Size([192]), dtype=torch.float32
+2025-04-30 13:24:49,921 - INFO -   - bn_fc2.running_var: shape=torch.Size([192]), dtype=torch.float32
+2025-04-30 13:24:49,922 - INFO -   - bn_fc2.num_batches_tracked: shape=torch.Size([]), dtype=torch.int64
+2025-04-30 13:24:49,922 - INFO -   - fc3.weight: shape=torch.Size([4, 192]), dtype=torch.float32
+2025-04-30 13:24:49,922 - INFO -   - fc3.bias: shape=torch.Size([4]), dtype=torch.float32
+2025-04-30 13:24:49,922 - INFO - 
+Configuración guardada:
+2025-04-30 13:24:49,923 - INFO -   - batch_size: 5
+2025-04-30 13:24:49,923 - INFO -   - learning_rate: 0.0002
+2025-04-30 13:24:49,923 - INFO -   - weight_decay: 0.0001
+2025-04-30 13:24:49,923 - INFO -   - num_epochs: 350
+2025-04-30 13:24:49,924 - INFO -   - early_stopping_patience: 70
+2025-04-30 13:24:49,924 - INFO -   - lr_scheduler_patience: 15
+2025-04-30 13:24:49,924 - INFO -   - target_samples_per_class: 80
+2025-04-30 13:24:49,925 - INFO -   - validation_size: 0.15
+2025-04-30 13:24:49,925 - INFO -   - test_size: 0.15
+2025-04-30 13:24:49,925 - INFO -   - use_extra_features: True
+2025-04-30 13:24:49,926 - INFO -   - use_cross_validation: True
+2025-04-30 13:24:49,926 - INFO -   - n_folds: 5
+2025-04-30 13:24:49,926 - INFO -   - ensemble_models: 3
+2025-04-30 13:24:49,927 - INFO -   - use_focal_loss: True
+2025-04-30 13:24:49,927 - INFO -   - use_class_weights: True
+2025-04-30 13:24:49,927 - INFO -   - mixup_alpha: 0.2
+2025-04-30 13:24:49,928 - INFO -   - hidden_dim: 384
+2025-04-30 13:24:49,928 - INFO -   - channels: [64, 128, 192]
+2025-04-30 13:24:49,928 - INFO -   - dropout_rate: 0.25
+2025-04-30 13:24:49,929 - INFO -   - attention_mechanism: True
+2025-04-30 13:24:49,929 - INFO - 
+Metadato adicional - accuracy:
+2025-04-30 13:24:49,929 - INFO -   Valor: 0.84375
+2025-04-30 13:24:49,930 - INFO - 
+Metadato adicional - class_names:
+2025-04-30 13:24:49,930 - INFO -   Valor: ['LeftArmThinking', 'RightArmThinking', 'LeftFistThinking', 'RightFistThinking']
+2025-04-30 13:24:49,930 - INFO - 
+Metadato adicional - n_features:
+2025-04-30 13:24:49,931 - INFO -   Valor: 20
+2025-04-30 13:24:49,931 - INFO - 
+Metadato adicional - seq_len:
+2025-04-30 13:24:49,931 - INFO -   Valor: 17
+2025-04-30 13:24:49,932 - INFO - Configuración del modelo: in_channels=20, n_classes=4
+2025-04-30 13:24:49,932 - INFO - Configuración guardada: {'batch_size': 5, 'learning_rate': 0.0002, 'weight_decay': 0.0001, 'num_epochs': 350, 'early_stopping_patience': 70, 'lr_scheduler_patience': 15, 'target_samples_per_class': 80, 'validation_size': 0.15, 'test_size': 0.15, 'use_extra_features': True, 'use_cross_validation': True, 'n_folds': 5, 'ensemble_models': 3, 'use_focal_loss': True, 'use_class_weights': True, 'mixup_alpha': 0.2, 'hidden_dim': 384, 'channels': [64, 128, 192], 'dropout_rate': 0.25, 'attention_mechanism': True}
+2025-04-30 13:24:49,932 - INFO - Configuración combinada: {'batch_size': 5, 'learning_rate': 0.0002, 'weight_decay': 0.0001, 'num_epochs': 350, 'early_stopping_patience': 70, 'lr_scheduler_patience': 15, 'target_samples_per_class': 80, 'validation_size': 0.15, 'test_size': 0.15, 'use_extra_features': True, 'use_cross_validation': True, 'n_folds': 5, 'ensemble_models': 3, 'use_focal_loss': True, 'use_class_weights': True, 'mixup_alpha': 0.2, 'hidden_dim': 384, 'channels': [64, 128, 192], 'dropout_rate': 0.25, 'attention_mechanism': True}
+2025-04-30 13:24:49,939 - INFO - Instancia del modelo creada
+2025-04-30 13:24:49,943 - INFO - Pesos del modelo cargados
+2025-04-30 13:24:49,944 - INFO - Modelo establecido en modo evaluación
+2025-04-30 13:24:49,944 - INFO - Modelo cargado exitosamente: model_1_0.8438.pt
+2025-04-30 13:24:49,944 - INFO - Instancia de CNNInference creada
+2025-04-30 13:24:49,944 - INFO - Esperando FEATURE_STREAM...
+2025-04-30 13:24:59,961 - ERROR - FEATURE_STREAM no encontrado
+2025-04-30 13:24:59,961 - INFO - Programa terminado

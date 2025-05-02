@@ -1,0 +1,616 @@
+2025-04-30 12:09:05,624 INFO Enviando comando al drone: command
+2025-04-30 12:09:10,634 ERROR Timeout al esperar respuesta del drone
+2025-04-30 12:09:10,635 ERROR No se pudo activar el modo SDK del drone
+2025-04-30 12:27:07,439 INFO Enviando comando al drone: command
+2025-04-30 12:27:12,446 ERROR Timeout al esperar respuesta del drone
+2025-04-30 12:27:12,447 ERROR No se pudo activar el modo SDK del drone
+2025-04-30 12:27:12,447 ERROR No se pudo establecer conexión con el drone
+2025-04-30 13:30:01,134 INFO Enviando comando al drone: command
+2025-04-30 13:34:39,053 INFO Enviando comando al drone: command
+2025-04-30 13:34:44,069 ERROR Timeout al esperar respuesta del drone
+2025-04-30 13:34:44,069 ERROR No se pudo activar el modo SDK del drone
+2025-04-30 13:34:44,069 ERROR No se pudo establecer conexión con el drone
+2025-04-30 14:42:48,676 INFO Enviando comando al drone: command
+2025-04-30 14:42:53,679 ERROR Timeout al esperar respuesta del drone
+2025-04-30 14:42:53,680 ERROR No se pudo activar el modo SDK del drone
+2025-04-30 14:42:53,680 ERROR No se pudo establecer conexión con el drone
+2025-04-30 14:46:42,108 INFO Enviando comando al drone: command
+2025-04-30 14:46:47,110 ERROR Timeout al esperar respuesta del drone
+2025-04-30 14:46:47,111 ERROR No se pudo activar el modo SDK del drone
+2025-04-30 14:46:47,111 ERROR No se pudo establecer conexión con el drone
+2025-04-30 14:59:02,847 INFO Tello instance was initialized. Host: '192.168.10.1'. Port: '8889'.
+2025-04-30 14:59:02,848 INFO Intento de conexión 1/3
+2025-04-30 14:59:02,851 INFO Send command: 'command'
+2025-04-30 14:59:09,877 WARNING Aborting command 'command'. Did not receive a response after 7 seconds
+2025-04-30 14:59:09,878 INFO Send command: 'command'
+2025-04-30 15:14:30,690 INFO Tello instance was initialized. Host: '192.168.10.1'. Port: '8889'.
+2025-04-30 15:14:30,690 INFO Intento de conexión 1/3
+2025-04-30 15:14:30,693 INFO Send command: 'command'
+2025-04-30 15:14:37,726 WARNING Aborting command 'command'. Did not receive a response after 7 seconds
+2025-04-30 15:14:37,726 INFO Send command: 'command'
+2025-04-30 15:14:44,754 WARNING Aborting command 'command'. Did not receive a response after 7 seconds
+2025-04-30 15:14:44,754 INFO Send command: 'command'
+2025-04-30 15:23:44,963 INFO Tello instance was initialized. Host: '192.168.10.1'. Port: '8889'.
+2025-04-30 15:23:44,963 INFO Intento de conexión 1/3
+2025-04-30 15:23:44,965 INFO Send command: 'command'
+2025-04-30 15:23:51,995 WARNING Aborting command 'command'. Did not receive a response after 7 seconds
+2025-04-30 15:23:51,995 INFO Send command: 'command'
+2025-04-30 15:23:59,021 WARNING Aborting command 'command'. Did not receive a response after 7 seconds
+2025-04-30 15:23:59,022 INFO Send command: 'command'
+2025-04-30 15:27:32,409 INFO Tello instance was initialized. Host: '192.168.10.1'. Port: '8889'.
+2025-04-30 15:27:32,410 INFO Intento de conexión 1/3
+2025-04-30 15:27:32,412 INFO Send command: 'command'
+2025-04-30 15:27:39,439 WARNING Aborting command 'command'. Did not receive a response after 7 seconds
+2025-04-30 15:27:39,439 INFO Send command: 'command'
+2025-04-30 15:27:46,467 WARNING Aborting command 'command'. Did not receive a response after 7 seconds
+2025-04-30 15:27:46,467 INFO Send command: 'command'
+2025-04-30 15:27:53,498 WARNING Aborting command 'command'. Did not receive a response after 7 seconds
+2025-04-30 15:27:53,498 ERROR Error al conectar: Command 'command' was unsuccessful for 4 tries. Latest response:	'Aborting command 'command'. Did not receive a response after 7 seconds'
+2025-04-30 15:27:53,499 INFO Reintentando en 2 segundos...
+2025-04-30 15:35:37,080 INFO Tello instance was initialized. Host: '192.168.10.1'. Port: '8889'.
+2025-04-30 15:35:37,080 INFO Intento de conexión 1/3
+2025-04-30 15:35:37,082 INFO Send command: 'command'
+2025-04-30 15:39:22,132 INFO Tello instance was initialized. Host: '192.168.10.1'. Port: '8889'.
+2025-04-30 15:39:22,133 INFO Intento de conexión 1/3
+2025-04-30 15:39:22,135 INFO Send command: 'command'
+2025-04-30 15:39:29,165 WARNING Aborting command 'command'. Did not receive a response after 7 seconds
+2025-04-30 15:39:29,165 INFO Send command: 'command'
+2025-04-30 15:39:36,192 WARNING Aborting command 'command'. Did not receive a response after 7 seconds
+2025-04-30 15:39:36,193 INFO Send command: 'command'
+2025-04-30 15:39:43,225 WARNING Aborting command 'command'. Did not receive a response after 7 seconds
+2025-04-30 15:39:43,225 ERROR Error al conectar: Command 'command' was unsuccessful for 4 tries. Latest response:	'Aborting command 'command'. Did not receive a response after 7 seconds'
+2025-04-30 15:39:43,225 INFO Reintentando en 2 segundos...
+2025-04-30 15:39:45,226 INFO Intento de conexión 2/3
+2025-04-30 15:39:45,226 INFO Send command: 'command'
+2025-04-30 15:39:52,253 WARNING Aborting command 'command'. Did not receive a response after 7 seconds
+2025-04-30 15:39:52,253 INFO Send command: 'command'
+2025-04-30 15:39:59,283 WARNING Aborting command 'command'. Did not receive a response after 7 seconds
+2025-04-30 15:39:59,283 INFO Send command: 'command'
+2025-04-30 15:46:22,669 INFO Tello instance was initialized. Host: '192.168.10.1'. Port: '8889'.
+2025-04-30 15:46:22,669 INFO Intento de conexión 1/3
+2025-04-30 15:46:22,671 INFO Send command: 'command'
+2025-04-30 15:46:29,706 WARNING Aborting command 'command'. Did not receive a response after 7 seconds
+2025-04-30 15:46:29,706 INFO Send command: 'command'
+2025-04-30 15:46:36,733 WARNING Aborting command 'command'. Did not receive a response after 7 seconds
+2025-04-30 15:46:36,734 INFO Send command: 'command'
+2025-04-30 15:48:18,215 INFO Tello instance was initialized. Host: '192.168.10.1'. Port: '8889'.
+2025-04-30 15:48:18,215 INFO Intento de conexión 1/3
+2025-04-30 15:48:18,217 INFO Send command: 'command'
+2025-04-30 15:48:25,245 WARNING Aborting command 'command'. Did not receive a response after 7 seconds
+2025-04-30 15:48:25,246 INFO Send command: 'command'
+2025-04-30 15:48:32,271 WARNING Aborting command 'command'. Did not receive a response after 7 seconds
+2025-04-30 15:48:32,271 INFO Send command: 'command'
+2025-04-30 15:48:39,295 WARNING Aborting command 'command'. Did not receive a response after 7 seconds
+2025-04-30 15:48:39,296 ERROR Error al conectar: Command 'command' was unsuccessful for 4 tries. Latest response:	'Aborting command 'command'. Did not receive a response after 7 seconds'
+2025-04-30 15:48:39,296 INFO Reintentando en 2 segundos...
+2025-04-30 15:48:41,296 INFO Intento de conexión 2/3
+2025-04-30 15:48:41,296 INFO Send command: 'command'
+2025-04-30 15:56:56,215 INFO Tello instance was initialized. Host: '192.168.10.1'. Port: '8889'.
+2025-04-30 15:56:56,216 INFO Intento de conexión 1/3
+2025-04-30 15:56:56,217 INFO Send command: 'command'
+2025-04-30 15:57:03,247 WARNING Aborting command 'command'. Did not receive a response after 7 seconds
+2025-04-30 15:57:03,247 INFO Send command: 'command'
+2025-04-30 15:57:10,283 WARNING Aborting command 'command'. Did not receive a response after 7 seconds
+2025-04-30 15:57:10,283 INFO Send command: 'command'
+2025-04-30 15:57:17,310 WARNING Aborting command 'command'. Did not receive a response after 7 seconds
+2025-04-30 15:57:17,310 ERROR Error al conectar: Command 'command' was unsuccessful for 4 tries. Latest response:	'Aborting command 'command'. Did not receive a response after 7 seconds'
+2025-04-30 15:57:17,310 INFO Reintentando en 2 segundos...
+2025-04-30 15:57:19,311 INFO Intento de conexión 2/3
+2025-04-30 15:57:19,311 INFO Send command: 'command'
+2025-04-30 15:57:26,345 WARNING Aborting command 'command'. Did not receive a response after 7 seconds
+2025-04-30 15:57:26,346 INFO Send command: 'command'
+2025-04-30 15:57:33,377 WARNING Aborting command 'command'. Did not receive a response after 7 seconds
+2025-04-30 15:57:33,378 INFO Send command: 'command'
+2025-04-30 15:57:40,409 WARNING Aborting command 'command'. Did not receive a response after 7 seconds
+2025-04-30 15:57:40,409 ERROR Error al conectar: Command 'command' was unsuccessful for 4 tries. Latest response:	'Aborting command 'command'. Did not receive a response after 7 seconds'
+2025-04-30 15:57:40,409 INFO Reintentando en 2 segundos...
+2025-04-30 15:57:42,410 INFO Intento de conexión 3/3
+2025-04-30 15:57:42,411 INFO Send command: 'command'
+2025-04-30 16:03:01,148 INFO Tello instance was initialized. Host: '192.168.10.1'. Port: '8889'.
+2025-04-30 16:03:01,149 INFO Intento de conexión 1/3
+2025-04-30 16:03:01,150 INFO Send command: 'command'
+2025-04-30 16:03:08,181 WARNING Aborting command 'command'. Did not receive a response after 7 seconds
+2025-04-30 16:03:08,181 INFO Send command: 'command'
+2025-04-30 16:03:15,212 WARNING Aborting command 'command'. Did not receive a response after 7 seconds
+2025-04-30 16:03:15,213 INFO Send command: 'command'
+2025-04-30 16:03:22,242 WARNING Aborting command 'command'. Did not receive a response after 7 seconds
+2025-04-30 16:03:22,242 ERROR Error al conectar: Command 'command' was unsuccessful for 4 tries. Latest response:	'Aborting command 'command'. Did not receive a response after 7 seconds'
+2025-04-30 16:03:22,242 INFO Reintentando en 2 segundos...
+2025-04-30 16:03:24,242 INFO Intento de conexión 2/3
+2025-04-30 16:03:24,243 INFO Send command: 'command'
+2025-04-30 16:03:31,269 WARNING Aborting command 'command'. Did not receive a response after 7 seconds
+2025-04-30 16:03:31,269 INFO Send command: 'command'
+2025-04-30 16:03:38,301 WARNING Aborting command 'command'. Did not receive a response after 7 seconds
+2025-04-30 16:03:38,301 INFO Send command: 'command'
+2025-04-30 16:06:45,704 INFO Tello instance was initialized. Host: '192.168.10.1'. Port: '8889'.
+2025-04-30 16:06:45,704 INFO Intento de conexión 1/3
+2025-04-30 16:06:45,706 INFO Send command: 'command'
+2025-04-30 16:06:52,735 WARNING Aborting command 'command'. Did not receive a response after 7 seconds
+2025-04-30 16:06:52,735 INFO Send command: 'command'
+2025-04-30 16:07:25,354 INFO Tello instance was initialized. Host: '192.168.10.1'. Port: '8889'.
+2025-04-30 16:07:25,354 INFO Intento de conexión 1/3
+2025-04-30 16:07:25,356 INFO Send command: 'command'
+2025-04-30 16:07:32,387 WARNING Aborting command 'command'. Did not receive a response after 7 seconds
+2025-04-30 16:07:32,388 INFO Send command: 'command'
+2025-04-30 16:07:39,414 WARNING Aborting command 'command'. Did not receive a response after 7 seconds
+2025-04-30 16:07:39,414 INFO Send command: 'command'
+2025-04-30 16:07:46,442 WARNING Aborting command 'command'. Did not receive a response after 7 seconds
+2025-04-30 16:07:46,443 ERROR Error al conectar: Command 'command' was unsuccessful for 4 tries. Latest response:	'Aborting command 'command'. Did not receive a response after 7 seconds'
+2025-04-30 16:07:46,443 INFO Reintentando en 2 segundos...
+2025-04-30 16:19:00,995 INFO Tello instance was initialized. Host: '192.168.10.1'. Port: '8889'.
+2025-04-30 16:19:00,995 INFO Intento de conexión 1/3
+2025-04-30 16:19:00,997 INFO Send command: 'command'
+2025-04-30 16:19:08,026 WARNING Aborting command 'command'. Did not receive a response after 7 seconds
+2025-04-30 16:19:08,026 INFO Send command: 'command'
+2025-04-30 16:19:15,055 WARNING Aborting command 'command'. Did not receive a response after 7 seconds
+2025-04-30 16:19:15,055 INFO Send command: 'command'
+2025-04-30 16:19:22,081 WARNING Aborting command 'command'. Did not receive a response after 7 seconds
+2025-04-30 16:19:22,081 ERROR Error al conectar: Command 'command' was unsuccessful for 4 tries. Latest response:	'Aborting command 'command'. Did not receive a response after 7 seconds'
+2025-04-30 16:19:22,081 INFO Reintentando en 2 segundos...
+2025-04-30 16:19:24,082 INFO Intento de conexión 2/3
+2025-04-30 16:19:24,082 INFO Send command: 'command'
+2025-04-30 16:19:31,114 WARNING Aborting command 'command'. Did not receive a response after 7 seconds
+2025-04-30 16:19:31,114 INFO Send command: 'command'
+2025-04-30 16:19:38,146 WARNING Aborting command 'command'. Did not receive a response after 7 seconds
+2025-04-30 16:19:38,146 INFO Send command: 'command'
+2025-04-30 16:19:45,180 WARNING Aborting command 'command'. Did not receive a response after 7 seconds
+2025-04-30 16:19:45,181 ERROR Error al conectar: Command 'command' was unsuccessful for 4 tries. Latest response:	'Aborting command 'command'. Did not receive a response after 7 seconds'
+2025-04-30 16:19:45,181 INFO Reintentando en 2 segundos...
+2025-04-30 16:19:47,182 INFO Intento de conexión 3/3
+2025-04-30 16:19:47,182 INFO Send command: 'command'
+2025-04-30 16:19:54,209 WARNING Aborting command 'command'. Did not receive a response after 7 seconds
+2025-04-30 16:19:54,209 INFO Send command: 'command'
+2025-04-30 16:20:01,243 WARNING Aborting command 'command'. Did not receive a response after 7 seconds
+2025-04-30 16:20:01,243 INFO Send command: 'command'
+2025-04-30 16:20:08,277 WARNING Aborting command 'command'. Did not receive a response after 7 seconds
+2025-04-30 16:20:08,277 ERROR Error al conectar: Command 'command' was unsuccessful for 4 tries. Latest response:	'Aborting command 'command'. Did not receive a response after 7 seconds'
+2025-04-30 16:20:08,278 ERROR Se agotaron los intentos de conexión
+2025-04-30 16:20:08,278 ERROR No se pudo establecer conexión con el drone
+2025-04-30 16:24:03,073 INFO Tello instance was initialized. Host: '192.168.10.1'. Port: '8889'.
+2025-04-30 16:24:03,073 INFO Intento de conexión 1/3
+2025-04-30 16:24:03,075 INFO Send command: 'command'
+2025-04-30 16:24:10,102 WARNING Aborting command 'command'. Did not receive a response after 7 seconds
+2025-04-30 16:24:10,102 INFO Send command: 'command'
+2025-04-30 16:24:17,130 WARNING Aborting command 'command'. Did not receive a response after 7 seconds
+2025-04-30 16:24:17,130 INFO Send command: 'command'
+2025-04-30 16:24:24,160 WARNING Aborting command 'command'. Did not receive a response after 7 seconds
+2025-04-30 16:24:24,161 ERROR Error al conectar: Command 'command' was unsuccessful for 4 tries. Latest response:	'Aborting command 'command'. Did not receive a response after 7 seconds'
+2025-04-30 16:24:24,161 INFO Reintentando en 2 segundos...
+2025-04-30 16:24:26,162 INFO Intento de conexión 2/3
+2025-04-30 16:24:26,162 INFO Send command: 'command'
+2025-04-30 16:29:34,712 INFO Tello instance was initialized. Host: '192.168.10.1'. Port: '8889'.
+2025-04-30 16:29:34,712 INFO Intento de conexión 1/3
+2025-04-30 16:29:34,714 INFO Send command: 'command'
+2025-04-30 16:29:41,743 WARNING Aborting command 'command'. Did not receive a response after 7 seconds
+2025-04-30 16:29:41,743 INFO Send command: 'command'
+2025-04-30 16:29:48,769 WARNING Aborting command 'command'. Did not receive a response after 7 seconds
+2025-04-30 16:29:48,770 INFO Send command: 'command'
+2025-04-30 16:29:55,800 WARNING Aborting command 'command'. Did not receive a response after 7 seconds
+2025-04-30 16:29:55,800 ERROR Error al conectar: Command 'command' was unsuccessful for 4 tries. Latest response:	'Aborting command 'command'. Did not receive a response after 7 seconds'
+2025-04-30 16:29:55,801 INFO Reintentando en 2 segundos...
+2025-04-30 16:29:57,801 INFO Intento de conexión 2/3
+2025-04-30 16:29:57,801 INFO Send command: 'command'
+2025-04-30 16:33:55,321 INFO Tello instance was initialized. Host: '192.168.10.1'. Port: '8889'.
+2025-04-30 16:33:55,321 INFO Intento de conexión 1/3
+2025-04-30 16:33:55,323 INFO Send command: 'command'
+2025-04-30 16:34:02,349 WARNING Aborting command 'command'. Did not receive a response after 7 seconds
+2025-04-30 16:34:02,350 INFO Send command: 'command'
+2025-04-30 16:34:09,379 WARNING Aborting command 'command'. Did not receive a response after 7 seconds
+2025-04-30 16:34:09,380 INFO Send command: 'command'
+2025-04-30 16:34:34,179 INFO Tello instance was initialized. Host: '192.168.10.1'. Port: '8889'.
+2025-04-30 16:34:34,179 INFO Intento de conexión 1/3
+2025-04-30 16:34:34,181 INFO Send command: 'command'
+2025-04-30 16:34:41,208 WARNING Aborting command 'command'. Did not receive a response after 7 seconds
+2025-04-30 16:34:41,209 INFO Send command: 'command'
+2025-04-30 16:34:48,234 WARNING Aborting command 'command'. Did not receive a response after 7 seconds
+2025-04-30 16:34:48,235 INFO Send command: 'command'
+2025-04-30 16:34:55,261 WARNING Aborting command 'command'. Did not receive a response after 7 seconds
+2025-04-30 16:34:55,261 ERROR Error al conectar: Command 'command' was unsuccessful for 4 tries. Latest response:	'Aborting command 'command'. Did not receive a response after 7 seconds'
+2025-04-30 16:34:55,261 INFO Reintentando en 2 segundos...
+2025-04-30 16:34:57,262 INFO Intento de conexión 2/3
+2025-04-30 16:34:57,263 INFO Send command: 'command'
+2025-04-30 16:35:04,299 WARNING Aborting command 'command'. Did not receive a response after 7 seconds
+2025-04-30 16:35:04,300 INFO Send command: 'command'
+2025-04-30 16:35:11,337 WARNING Aborting command 'command'. Did not receive a response after 7 seconds
+2025-04-30 16:35:11,338 INFO Send command: 'command'
+2025-04-30 16:35:18,373 WARNING Aborting command 'command'. Did not receive a response after 7 seconds
+2025-04-30 16:35:18,374 ERROR Error al conectar: Command 'command' was unsuccessful for 4 tries. Latest response:	'Aborting command 'command'. Did not receive a response after 7 seconds'
+2025-04-30 16:35:18,374 INFO Reintentando en 2 segundos...
+2025-04-30 16:35:20,375 INFO Intento de conexión 3/3
+2025-04-30 16:35:20,375 INFO Send command: 'command'
+2025-04-30 16:35:27,408 WARNING Aborting command 'command'. Did not receive a response after 7 seconds
+2025-04-30 16:35:27,409 INFO Send command: 'command'
+2025-04-30 16:35:34,441 WARNING Aborting command 'command'. Did not receive a response after 7 seconds
+2025-04-30 16:35:34,442 INFO Send command: 'command'
+2025-04-30 16:35:41,481 WARNING Aborting command 'command'. Did not receive a response after 7 seconds
+2025-04-30 16:35:41,482 ERROR Error al conectar: Command 'command' was unsuccessful for 4 tries. Latest response:	'Aborting command 'command'. Did not receive a response after 7 seconds'
+2025-04-30 16:35:41,483 ERROR Se agotaron los intentos de conexión
+2025-04-30 16:35:41,483 ERROR No se pudo establecer conexión con el drone
+2025-04-30 16:47:45,688 INFO Tello instance was initialized. Host: '192.168.10.1'. Port: '8889'.
+2025-04-30 16:47:45,688 INFO Intento de conexión 1/3
+2025-04-30 16:47:45,690 INFO Send command: 'command'
+2025-04-30 16:47:52,715 WARNING Aborting command 'command'. Did not receive a response after 7 seconds
+2025-04-30 16:47:52,716 INFO Send command: 'command'
+2025-04-30 16:47:59,743 WARNING Aborting command 'command'. Did not receive a response after 7 seconds
+2025-04-30 16:47:59,743 INFO Send command: 'command'
+2025-04-30 16:48:06,771 WARNING Aborting command 'command'. Did not receive a response after 7 seconds
+2025-04-30 16:48:06,772 ERROR Error al conectar: Command 'command' was unsuccessful for 4 tries. Latest response:	'Aborting command 'command'. Did not receive a response after 7 seconds'
+2025-04-30 16:48:06,772 INFO Reintentando en 2 segundos...
+2025-04-30 16:48:08,772 INFO Intento de conexión 2/3
+2025-04-30 16:48:08,773 INFO Send command: 'command'
+2025-04-30 16:48:15,799 WARNING Aborting command 'command'. Did not receive a response after 7 seconds
+2025-04-30 16:48:15,799 INFO Send command: 'command'
+2025-04-30 16:48:22,823 WARNING Aborting command 'command'. Did not receive a response after 7 seconds
+2025-04-30 16:48:22,823 INFO Send command: 'command'
+2025-04-30 16:48:29,857 WARNING Aborting command 'command'. Did not receive a response after 7 seconds
+2025-04-30 16:48:29,858 ERROR Error al conectar: Command 'command' was unsuccessful for 4 tries. Latest response:	'Aborting command 'command'. Did not receive a response after 7 seconds'
+2025-04-30 16:48:29,858 INFO Reintentando en 2 segundos...
+2025-04-30 16:48:31,859 INFO Intento de conexión 3/3
+2025-04-30 16:48:31,859 INFO Send command: 'command'
+2025-04-30 16:48:38,945 WARNING Aborting command 'command'. Did not receive a response after 7 seconds
+2025-04-30 16:48:38,945 INFO Send command: 'command'
+2025-04-30 16:48:46,006 WARNING Aborting command 'command'. Did not receive a response after 7 seconds
+2025-04-30 16:48:46,007 INFO Send command: 'command'
+2025-04-30 16:48:53,039 WARNING Aborting command 'command'. Did not receive a response after 7 seconds
+2025-04-30 16:48:53,040 ERROR Error al conectar: Command 'command' was unsuccessful for 4 tries. Latest response:	'Aborting command 'command'. Did not receive a response after 7 seconds'
+2025-04-30 16:48:53,040 ERROR Se agotaron los intentos de conexión
+2025-04-30 16:48:53,040 ERROR No se pudo establecer conexión con el drone
+2025-04-30 16:58:28,168 INFO Tello instance was initialized. Host: '192.168.10.1'. Port: '8889'.
+2025-04-30 16:58:28,168 INFO Intento de conexión 1/3
+2025-04-30 16:58:28,170 INFO Send command: 'command'
+2025-04-30 16:58:35,196 WARNING Aborting command 'command'. Did not receive a response after 7 seconds
+2025-04-30 16:58:35,197 INFO Send command: 'command'
+2025-04-30 17:01:56,359 INFO Tello instance was initialized. Host: '192.168.10.1'. Port: '8889'.
+2025-04-30 17:01:56,360 INFO Intento de conexión 1/3
+2025-04-30 17:01:56,362 INFO Send command: 'command'
+2025-04-30 17:02:03,392 WARNING Aborting command 'command'. Did not receive a response after 7 seconds
+2025-04-30 17:02:03,392 INFO Send command: 'command'
+2025-04-30 17:02:10,420 WARNING Aborting command 'command'. Did not receive a response after 7 seconds
+2025-04-30 17:02:10,420 INFO Send command: 'command'
+2025-04-30 17:02:17,447 WARNING Aborting command 'command'. Did not receive a response after 7 seconds
+2025-04-30 17:02:17,448 ERROR Error al conectar: Command 'command' was unsuccessful for 4 tries. Latest response:	'Aborting command 'command'. Did not receive a response after 7 seconds'
+2025-04-30 17:02:17,448 INFO Reintentando en 2 segundos...
+2025-04-30 17:02:19,449 INFO Intento de conexión 2/3
+2025-04-30 17:02:19,449 INFO Send command: 'command'
+2025-04-30 17:02:26,477 WARNING Aborting command 'command'. Did not receive a response after 7 seconds
+2025-04-30 17:02:26,477 INFO Send command: 'command'
+2025-04-30 17:02:33,503 WARNING Aborting command 'command'. Did not receive a response after 7 seconds
+2025-04-30 17:02:33,505 INFO Send command: 'command'
+2025-04-30 17:05:31,092 INFO Tello instance was initialized. Host: '192.168.10.1'. Port: '8889'.
+2025-04-30 17:05:31,092 INFO Intento de conexión 1/3
+2025-04-30 17:05:31,095 INFO Send command: 'command'
+2025-04-30 17:05:38,122 WARNING Aborting command 'command'. Did not receive a response after 7 seconds
+2025-04-30 17:05:38,123 INFO Send command: 'command'
+2025-04-30 17:05:45,148 WARNING Aborting command 'command'. Did not receive a response after 7 seconds
+2025-04-30 17:05:45,149 INFO Send command: 'command'
+2025-04-30 17:05:52,175 WARNING Aborting command 'command'. Did not receive a response after 7 seconds
+2025-04-30 17:05:52,175 ERROR Error al conectar: Command 'command' was unsuccessful for 4 tries. Latest response:	'Aborting command 'command'. Did not receive a response after 7 seconds'
+2025-04-30 17:05:52,175 INFO Reintentando en 2 segundos...
+2025-04-30 17:05:54,176 INFO Intento de conexión 2/3
+2025-04-30 17:05:54,177 INFO Send command: 'command'
+2025-04-30 17:06:01,204 WARNING Aborting command 'command'. Did not receive a response after 7 seconds
+2025-04-30 17:06:01,205 INFO Send command: 'command'
+2025-04-30 17:06:08,244 WARNING Aborting command 'command'. Did not receive a response after 7 seconds
+2025-04-30 17:06:08,244 INFO Send command: 'command'
+2025-04-30 17:06:58,911 INFO Tello instance was initialized. Host: '192.168.10.1'. Port: '8889'.
+2025-04-30 17:06:58,911 INFO Intento de conexión 1/3
+2025-04-30 17:06:58,913 INFO Send command: 'command'
+2025-04-30 17:07:05,940 WARNING Aborting command 'command'. Did not receive a response after 7 seconds
+2025-04-30 17:07:05,941 INFO Send command: 'command'
+2025-04-30 17:07:12,967 WARNING Aborting command 'command'. Did not receive a response after 7 seconds
+2025-04-30 17:07:12,968 INFO Send command: 'command'
+2025-04-30 17:07:19,995 WARNING Aborting command 'command'. Did not receive a response after 7 seconds
+2025-04-30 17:07:19,995 ERROR Error al conectar: Command 'command' was unsuccessful for 4 tries. Latest response:	'Aborting command 'command'. Did not receive a response after 7 seconds'
+2025-04-30 17:07:19,995 INFO Reintentando en 2 segundos...
+2025-04-30 17:07:21,995 INFO Intento de conexión 2/3
+2025-04-30 17:07:21,996 INFO Send command: 'command'
+2025-04-30 17:07:29,021 WARNING Aborting command 'command'. Did not receive a response after 7 seconds
+2025-04-30 17:07:29,021 INFO Send command: 'command'
+2025-04-30 17:07:36,047 WARNING Aborting command 'command'. Did not receive a response after 7 seconds
+2025-04-30 17:07:36,047 INFO Send command: 'command'
+2025-04-30 17:07:43,075 WARNING Aborting command 'command'. Did not receive a response after 7 seconds
+2025-04-30 17:07:43,076 ERROR Error al conectar: Command 'command' was unsuccessful for 4 tries. Latest response:	'Aborting command 'command'. Did not receive a response after 7 seconds'
+2025-04-30 17:07:43,076 INFO Reintentando en 2 segundos...
+2025-04-30 17:07:45,076 INFO Intento de conexión 3/3
+2025-04-30 17:07:45,077 INFO Send command: 'command'
+2025-04-30 17:07:52,105 WARNING Aborting command 'command'. Did not receive a response after 7 seconds
+2025-04-30 17:07:52,105 INFO Send command: 'command'
+2025-04-30 17:07:59,134 WARNING Aborting command 'command'. Did not receive a response after 7 seconds
+2025-04-30 17:07:59,134 INFO Send command: 'command'
+2025-04-30 17:08:06,178 WARNING Aborting command 'command'. Did not receive a response after 7 seconds
+2025-04-30 17:08:06,179 ERROR Error al conectar: Command 'command' was unsuccessful for 4 tries. Latest response:	'Aborting command 'command'. Did not receive a response after 7 seconds'
+2025-04-30 17:08:06,179 ERROR Se agotaron los intentos de conexión
+2025-04-30 17:08:06,179 ERROR No se pudo establecer conexión con el drone
+2025-04-30 19:10:44,533 INFO Tello instance was initialized. Host: '192.168.10.1'. Port: '8889'.
+2025-04-30 19:10:44,533 INFO Intento de conexión 1/3
+2025-04-30 19:10:44,535 INFO Send command: 'command'
+2025-04-30 19:10:51,568 WARNING Aborting command 'command'. Did not receive a response after 7 seconds
+2025-04-30 19:10:51,568 INFO Send command: 'command'
+2025-04-30 19:10:58,615 WARNING Aborting command 'command'. Did not receive a response after 7 seconds
+2025-04-30 19:10:58,616 INFO Send command: 'command'
+2025-04-30 19:11:05,652 WARNING Aborting command 'command'. Did not receive a response after 7 seconds
+2025-04-30 19:11:05,652 ERROR Error al conectar: Command 'command' was unsuccessful for 4 tries. Latest response:	'Aborting command 'command'. Did not receive a response after 7 seconds'
+2025-04-30 19:11:05,652 INFO Reintentando en 2 segundos...
+2025-04-30 19:11:07,653 INFO Intento de conexión 2/3
+2025-04-30 19:11:07,653 INFO Send command: 'command'
+2025-04-30 19:47:22,265 INFO Tello instance was initialized. Host: '192.168.10.1'. Port: '8889'.
+2025-04-30 19:47:22,265 INFO Intento de conexión 1/3
+2025-04-30 19:47:22,268 INFO Send command: 'command'
+2025-04-30 19:47:29,298 WARNING Aborting command 'command'. Did not receive a response after 7 seconds
+2025-04-30 19:47:29,298 INFO Send command: 'command'
+2025-04-30 19:47:36,324 WARNING Aborting command 'command'. Did not receive a response after 7 seconds
+2025-04-30 19:47:36,325 INFO Send command: 'command'
+2025-04-30 19:47:43,353 WARNING Aborting command 'command'. Did not receive a response after 7 seconds
+2025-04-30 19:47:43,354 ERROR Error al conectar: Command 'command' was unsuccessful for 4 tries. Latest response:	'Aborting command 'command'. Did not receive a response after 7 seconds'
+2025-04-30 19:47:43,354 INFO Reintentando en 2 segundos...
+2025-04-30 19:47:45,354 INFO Intento de conexión 2/3
+2025-04-30 19:47:45,354 INFO Send command: 'command'
+2025-04-30 19:48:49,534 INFO Tello instance was initialized. Host: '192.168.10.1'. Port: '8889'.
+2025-04-30 19:48:49,534 INFO Intento de conexión 1/3
+2025-04-30 19:48:49,537 INFO Send command: 'command'
+2025-04-30 19:48:56,572 WARNING Aborting command 'command'. Did not receive a response after 7 seconds
+2025-04-30 19:48:56,572 INFO Send command: 'command'
+2025-04-30 19:49:03,605 WARNING Aborting command 'command'. Did not receive a response after 7 seconds
+2025-04-30 19:49:03,606 INFO Send command: 'command'
+2025-04-30 19:49:10,650 WARNING Aborting command 'command'. Did not receive a response after 7 seconds
+2025-04-30 19:49:10,653 ERROR Error al conectar: Command 'command' was unsuccessful for 4 tries. Latest response:	'Aborting command 'command'. Did not receive a response after 7 seconds'
+2025-04-30 19:49:10,654 INFO Reintentando en 2 segundos...
+2025-04-30 19:49:12,655 INFO Intento de conexión 2/3
+2025-04-30 19:49:12,655 INFO Send command: 'command'
+2025-04-30 19:49:19,670 WARNING Aborting command 'command'. Did not receive a response after 7 seconds
+2025-04-30 19:49:19,670 INFO Send command: 'command'
+2025-04-30 19:49:26,703 WARNING Aborting command 'command'. Did not receive a response after 7 seconds
+2025-04-30 19:49:26,704 INFO Send command: 'command'
+2025-04-30 19:49:33,736 WARNING Aborting command 'command'. Did not receive a response after 7 seconds
+2025-04-30 19:49:33,737 ERROR Error al conectar: Command 'command' was unsuccessful for 4 tries. Latest response:	'Aborting command 'command'. Did not receive a response after 7 seconds'
+2025-04-30 19:49:33,737 INFO Reintentando en 2 segundos...
+2025-04-30 19:49:35,737 INFO Intento de conexión 3/3
+2025-04-30 19:49:35,738 INFO Send command: 'command'
+2025-04-30 19:49:42,770 WARNING Aborting command 'command'. Did not receive a response after 7 seconds
+2025-04-30 19:49:42,770 INFO Send command: 'command'
+2025-04-30 19:49:49,807 WARNING Aborting command 'command'. Did not receive a response after 7 seconds
+2025-04-30 19:49:49,808 INFO Send command: 'command'
+2025-04-30 19:49:56,892 WARNING Aborting command 'command'. Did not receive a response after 7 seconds
+2025-04-30 19:49:56,892 ERROR Error al conectar: Command 'command' was unsuccessful for 4 tries. Latest response:	'Aborting command 'command'. Did not receive a response after 7 seconds'
+2025-04-30 19:49:56,892 ERROR Se agotaron los intentos de conexión
+2025-04-30 19:49:56,892 ERROR No se pudo establecer conexión con el drone
+2025-04-30 20:47:25,296 INFO Tello instance was initialized. Host: '192.168.10.1'. Port: '8889'.
+2025-04-30 20:47:25,297 INFO Intento de conexión 1/3
+2025-04-30 20:47:25,299 INFO Send command: 'command'
+2025-04-30 20:47:32,323 WARNING Aborting command 'command'. Did not receive a response after 7 seconds
+2025-04-30 20:47:32,323 INFO Send command: 'command'
+2025-04-30 20:47:39,347 WARNING Aborting command 'command'. Did not receive a response after 7 seconds
+2025-04-30 20:47:39,347 INFO Send command: 'command'
+2025-04-30 20:47:46,375 WARNING Aborting command 'command'. Did not receive a response after 7 seconds
+2025-04-30 20:47:46,376 ERROR Error al conectar: Command 'command' was unsuccessful for 4 tries. Latest response:	'Aborting command 'command'. Did not receive a response after 7 seconds'
+2025-04-30 20:47:46,376 INFO Reintentando en 2 segundos...
+2025-04-30 20:47:48,376 INFO Intento de conexión 2/3
+2025-04-30 20:47:48,377 INFO Send command: 'command'
+2025-04-30 20:47:55,405 WARNING Aborting command 'command'. Did not receive a response after 7 seconds
+2025-04-30 20:47:55,406 INFO Send command: 'command'
+2025-04-30 20:48:02,433 WARNING Aborting command 'command'. Did not receive a response after 7 seconds
+2025-04-30 20:48:02,433 INFO Send command: 'command'
+2025-04-30 20:48:09,459 WARNING Aborting command 'command'. Did not receive a response after 7 seconds
+2025-04-30 20:48:09,460 ERROR Error al conectar: Command 'command' was unsuccessful for 4 tries. Latest response:	'Aborting command 'command'. Did not receive a response after 7 seconds'
+2025-04-30 20:48:09,460 INFO Reintentando en 2 segundos...
+2025-04-30 20:48:11,460 INFO Intento de conexión 3/3
+2025-04-30 20:48:11,461 INFO Send command: 'command'
+2025-04-30 20:48:18,520 WARNING Aborting command 'command'. Did not receive a response after 7 seconds
+2025-04-30 20:48:18,521 INFO Send command: 'command'
+2025-04-30 20:56:16,697 INFO Tello instance was initialized. Host: '192.168.10.1'. Port: '8889'.
+2025-04-30 20:56:16,698 INFO Intento de conexión 1/3
+2025-04-30 20:56:16,700 INFO Send command: 'command'
+2025-04-30 20:56:23,725 WARNING Aborting command 'command'. Did not receive a response after 7 seconds
+2025-04-30 20:56:23,726 INFO Send command: 'command'
+2025-04-30 20:56:30,753 WARNING Aborting command 'command'. Did not receive a response after 7 seconds
+2025-04-30 20:56:30,754 INFO Send command: 'command'
+2025-04-30 20:56:37,781 WARNING Aborting command 'command'. Did not receive a response after 7 seconds
+2025-04-30 20:56:37,781 ERROR Error al conectar: Command 'command' was unsuccessful for 4 tries. Latest response:	'Aborting command 'command'. Did not receive a response after 7 seconds'
+2025-04-30 20:56:37,781 INFO Reintentando en 2 segundos...
+2025-04-30 20:56:39,781 INFO Intento de conexión 2/3
+2025-04-30 20:56:39,782 INFO Send command: 'command'
+2025-04-30 20:56:46,808 WARNING Aborting command 'command'. Did not receive a response after 7 seconds
+2025-04-30 20:56:46,809 INFO Send command: 'command'
+2025-04-30 20:56:53,835 WARNING Aborting command 'command'. Did not receive a response after 7 seconds
+2025-04-30 20:56:53,835 INFO Send command: 'command'
+2025-04-30 20:57:00,867 WARNING Aborting command 'command'. Did not receive a response after 7 seconds
+2025-04-30 20:57:00,867 ERROR Error al conectar: Command 'command' was unsuccessful for 4 tries. Latest response:	'Aborting command 'command'. Did not receive a response after 7 seconds'
+2025-04-30 20:57:00,867 INFO Reintentando en 2 segundos...
+2025-04-30 20:57:02,868 INFO Intento de conexión 3/3
+2025-04-30 20:57:02,868 INFO Send command: 'command'
+2025-04-30 20:57:09,906 WARNING Aborting command 'command'. Did not receive a response after 7 seconds
+2025-04-30 20:57:09,907 INFO Send command: 'command'
+2025-04-30 20:57:16,953 WARNING Aborting command 'command'. Did not receive a response after 7 seconds
+2025-04-30 20:57:16,954 INFO Send command: 'command'
+2025-04-30 21:04:52,969 INFO Tello instance was initialized. Host: '192.168.10.1'. Port: '8889'.
+2025-04-30 21:04:52,970 INFO Intento de conexión 1/3
+2025-04-30 21:04:52,972 INFO Send command: 'command'
+2025-04-30 21:05:00,000 WARNING Aborting command 'command'. Did not receive a response after 7 seconds
+2025-04-30 21:05:00,000 INFO Send command: 'command'
+2025-04-30 21:05:07,029 WARNING Aborting command 'command'. Did not receive a response after 7 seconds
+2025-04-30 21:05:07,029 INFO Send command: 'command'
+2025-04-30 21:05:14,061 WARNING Aborting command 'command'. Did not receive a response after 7 seconds
+2025-04-30 21:05:14,061 ERROR Error al conectar: Command 'command' was unsuccessful for 4 tries. Latest response:	'Aborting command 'command'. Did not receive a response after 7 seconds'
+2025-04-30 21:05:14,061 INFO Reintentando en 2 segundos...
+2025-04-30 21:05:16,061 INFO Intento de conexión 2/3
+2025-04-30 21:05:16,062 INFO Send command: 'command'
+2025-04-30 21:05:23,088 WARNING Aborting command 'command'. Did not receive a response after 7 seconds
+2025-04-30 21:05:23,088 INFO Send command: 'command'
+2025-04-30 21:05:30,116 WARNING Aborting command 'command'. Did not receive a response after 7 seconds
+2025-04-30 21:05:30,117 INFO Send command: 'command'
+2025-04-30 21:05:37,145 WARNING Aborting command 'command'. Did not receive a response after 7 seconds
+2025-04-30 21:05:37,145 ERROR Error al conectar: Command 'command' was unsuccessful for 4 tries. Latest response:	'Aborting command 'command'. Did not receive a response after 7 seconds'
+2025-04-30 21:05:37,145 INFO Reintentando en 2 segundos...
+2025-04-30 21:05:39,146 INFO Intento de conexión 3/3
+2025-04-30 21:05:39,146 INFO Send command: 'command'
+2025-04-30 21:05:46,176 WARNING Aborting command 'command'. Did not receive a response after 7 seconds
+2025-04-30 21:05:46,177 INFO Send command: 'command'
+2025-04-30 21:05:53,206 WARNING Aborting command 'command'. Did not receive a response after 7 seconds
+2025-04-30 21:05:53,206 INFO Send command: 'command'
+2025-04-30 21:06:00,237 WARNING Aborting command 'command'. Did not receive a response after 7 seconds
+2025-04-30 21:06:00,237 ERROR Error al conectar: Command 'command' was unsuccessful for 4 tries. Latest response:	'Aborting command 'command'. Did not receive a response after 7 seconds'
+2025-04-30 21:06:00,238 ERROR Se agotaron los intentos de conexión
+2025-04-30 21:06:00,238 ERROR No se pudo establecer conexión con el drone
+2025-04-30 21:22:27,360 INFO Tello instance was initialized. Host: '192.168.10.1'. Port: '8889'.
+2025-04-30 21:22:27,360 INFO Intento de conexión 1/3
+2025-04-30 21:22:27,362 INFO Send command: 'command'
+2025-04-30 21:22:34,391 WARNING Aborting command 'command'. Did not receive a response after 7 seconds
+2025-04-30 21:22:34,391 INFO Send command: 'command'
+2025-04-30 21:22:41,420 WARNING Aborting command 'command'. Did not receive a response after 7 seconds
+2025-04-30 21:22:41,421 INFO Send command: 'command'
+2025-04-30 21:22:48,450 WARNING Aborting command 'command'. Did not receive a response after 7 seconds
+2025-04-30 21:22:48,450 ERROR Error al conectar: Command 'command' was unsuccessful for 4 tries. Latest response:	'Aborting command 'command'. Did not receive a response after 7 seconds'
+2025-04-30 21:22:48,450 INFO Reintentando en 2 segundos...
+2025-04-30 21:22:50,450 INFO Intento de conexión 2/3
+2025-04-30 21:22:50,451 INFO Send command: 'command'
+2025-04-30 21:25:36,277 INFO Tello instance was initialized. Host: '192.168.10.1'. Port: '8889'.
+2025-04-30 21:25:36,278 INFO Intento de conexión 1/3
+2025-04-30 21:25:36,280 INFO Send command: 'command'
+2025-04-30 21:25:43,310 WARNING Aborting command 'command'. Did not receive a response after 7 seconds
+2025-04-30 21:25:43,310 INFO Send command: 'command'
+2025-04-30 21:25:50,339 WARNING Aborting command 'command'. Did not receive a response after 7 seconds
+2025-04-30 21:25:50,340 INFO Send command: 'command'
+2025-04-30 21:25:57,368 WARNING Aborting command 'command'. Did not receive a response after 7 seconds
+2025-04-30 21:25:57,368 ERROR Error al conectar: Command 'command' was unsuccessful for 4 tries. Latest response:	'Aborting command 'command'. Did not receive a response after 7 seconds'
+2025-04-30 21:25:57,368 INFO Reintentando en 2 segundos...
+2025-04-30 21:25:59,369 INFO Intento de conexión 2/3
+2025-04-30 21:25:59,369 INFO Send command: 'command'
+2025-04-30 21:26:06,393 WARNING Aborting command 'command'. Did not receive a response after 7 seconds
+2025-04-30 21:26:06,394 INFO Send command: 'command'
+2025-04-30 21:26:13,419 WARNING Aborting command 'command'. Did not receive a response after 7 seconds
+2025-04-30 21:26:13,419 INFO Send command: 'command'
+2025-04-30 21:26:20,450 WARNING Aborting command 'command'. Did not receive a response after 7 seconds
+2025-04-30 21:26:20,450 ERROR Error al conectar: Command 'command' was unsuccessful for 4 tries. Latest response:	'Aborting command 'command'. Did not receive a response after 7 seconds'
+2025-04-30 21:26:20,450 INFO Reintentando en 2 segundos...
+2025-04-30 21:26:22,451 INFO Intento de conexión 3/3
+2025-04-30 21:26:22,451 INFO Send command: 'command'
+2025-04-30 21:26:29,481 WARNING Aborting command 'command'. Did not receive a response after 7 seconds
+2025-04-30 21:26:29,481 INFO Send command: 'command'
+2025-04-30 21:26:36,509 WARNING Aborting command 'command'. Did not receive a response after 7 seconds
+2025-04-30 21:26:36,510 INFO Send command: 'command'
+2025-04-30 21:26:43,540 WARNING Aborting command 'command'. Did not receive a response after 7 seconds
+2025-04-30 21:26:43,541 ERROR Error al conectar: Command 'command' was unsuccessful for 4 tries. Latest response:	'Aborting command 'command'. Did not receive a response after 7 seconds'
+2025-04-30 21:26:43,541 ERROR Se agotaron los intentos de conexión
+2025-04-30 21:26:43,541 ERROR No se pudo establecer conexión con el drone
+2025-04-30 22:04:42,768 INFO Tello instance was initialized. Host: '192.168.10.1'. Port: '8889'.
+2025-04-30 22:04:42,768 INFO Intento de conexión 1/3
+2025-04-30 22:04:42,771 INFO Send command: 'command'
+2025-04-30 22:04:42,872 INFO Response command: 'OK'
+2025-04-30 22:04:43,885 ERROR Error al conectar: Did not receive a state packet from the Tello
+2025-04-30 22:04:43,885 INFO Reintentando en 2 segundos...
+2025-04-30 22:04:45,886 INFO Intento de conexión 2/3
+2025-04-30 22:04:45,886 INFO Send command: 'command'
+2025-04-30 22:04:45,987 INFO Response command: 'OK'
+2025-04-30 22:04:46,997 ERROR Error al conectar: Did not receive a state packet from the Tello
+2025-04-30 22:04:46,998 INFO Reintentando en 2 segundos...
+2025-04-30 22:04:48,998 INFO Intento de conexión 3/3
+2025-04-30 22:04:48,998 INFO Send command: 'command'
+2025-04-30 22:04:49,099 INFO Response command: 'OK'
+2025-04-30 22:04:50,110 ERROR Error al conectar: Did not receive a state packet from the Tello
+2025-04-30 22:04:50,110 ERROR Se agotaron los intentos de conexión
+2025-04-30 22:04:50,110 ERROR No se pudo establecer conexión con el drone
+2025-04-30 22:07:54,377 INFO Tello instance was initialized. Host: '192.168.10.1'. Port: '8889'.
+2025-04-30 22:07:54,378 INFO Intento de conexión 1/3
+2025-04-30 22:07:54,381 INFO Send command: 'command'
+2025-04-30 22:07:54,481 INFO Response command: 'OK'
+2025-04-30 22:07:55,491 ERROR Error al conectar: Did not receive a state packet from the Tello
+2025-04-30 22:07:55,491 INFO Reintentando en 2 segundos...
+2025-04-30 22:07:57,492 INFO Intento de conexión 2/3
+2025-04-30 22:07:57,492 INFO Send command: 'command'
+2025-04-30 22:07:57,493 INFO Response command: 'OK'
+2025-04-30 22:07:58,500 ERROR Error al conectar: Did not receive a state packet from the Tello
+2025-04-30 22:07:58,501 INFO Reintentando en 2 segundos...
+2025-04-30 22:08:00,501 INFO Intento de conexión 3/3
+2025-04-30 22:08:00,501 INFO Send command: 'command'
+2025-04-30 22:08:00,502 INFO Response command: 'OK'
+2025-04-30 22:08:01,513 ERROR Error al conectar: Did not receive a state packet from the Tello
+2025-04-30 22:08:01,514 ERROR Se agotaron los intentos de conexión
+2025-04-30 22:08:01,514 ERROR No se pudo establecer conexión con el drone
+2025-04-30 22:15:04,421 INFO Tello instance was initialized. Host: '192.168.10.1'. Port: '8889'.
+2025-04-30 22:15:04,421 INFO Intento de conexión 1/3
+2025-04-30 22:15:04,423 INFO Send command: 'command'
+2025-04-30 22:15:11,453 WARNING Aborting command 'command'. Did not receive a response after 7 seconds
+2025-04-30 22:15:11,453 INFO Send command: 'command'
+2025-04-30 22:18:07,250 INFO Tello instance was initialized. Host: '192.168.10.1'. Port: '8889'.
+2025-04-30 22:18:07,250 INFO Intento de conexión 1/3
+2025-04-30 22:18:07,252 INFO Send command: 'command'
+2025-04-30 22:18:14,278 WARNING Aborting command 'command'. Did not receive a response after 7 seconds
+2025-04-30 22:18:14,278 INFO Send command: 'command'
+2025-04-30 22:18:21,303 WARNING Aborting command 'command'. Did not receive a response after 7 seconds
+2025-04-30 22:18:21,304 INFO Send command: 'command'
+2025-04-30 22:18:28,333 WARNING Aborting command 'command'. Did not receive a response after 7 seconds
+2025-04-30 22:18:28,333 ERROR Error al conectar: Command 'command' was unsuccessful for 4 tries. Latest response:	'Aborting command 'command'. Did not receive a response after 7 seconds'
+2025-04-30 22:18:28,334 INFO Reintentando en 2 segundos...
+2025-04-30 22:18:30,334 INFO Intento de conexión 2/3
+2025-04-30 22:18:30,334 INFO Send command: 'command'
+2025-04-30 22:18:37,365 WARNING Aborting command 'command'. Did not receive a response after 7 seconds
+2025-04-30 22:18:37,366 INFO Send command: 'command'
+2025-04-30 22:18:44,394 WARNING Aborting command 'command'. Did not receive a response after 7 seconds
+2025-04-30 22:18:44,394 INFO Send command: 'command'
+2025-05-01 16:05:20,228 INFO Tello instance was initialized. Host: '192.168.10.1'. Port: '8889'.
+2025-05-01 16:05:20,229 INFO Intento de conexión 1/3
+2025-05-01 16:05:20,232 INFO Send command: 'command'
+2025-05-01 16:05:27,259 WARNING Aborting command 'command'. Did not receive a response after 7 seconds
+2025-05-01 16:05:27,259 INFO Send command: 'command'
+2025-05-01 16:05:34,287 WARNING Aborting command 'command'. Did not receive a response after 7 seconds
+2025-05-01 16:05:34,287 INFO Send command: 'command'
+2025-05-01 16:05:41,313 WARNING Aborting command 'command'. Did not receive a response after 7 seconds
+2025-05-01 16:05:41,313 ERROR Error al conectar: Command 'command' was unsuccessful for 4 tries. Latest response:	'Aborting command 'command'. Did not receive a response after 7 seconds'
+2025-05-01 16:05:41,313 INFO Reintentando en 2 segundos...
+2025-05-01 16:05:43,314 INFO Intento de conexión 2/3
+2025-05-01 16:05:43,314 INFO Send command: 'command'
+2025-05-01 16:05:50,340 WARNING Aborting command 'command'. Did not receive a response after 7 seconds
+2025-05-01 16:05:50,340 INFO Send command: 'command'
+2025-05-01 16:05:57,369 WARNING Aborting command 'command'. Did not receive a response after 7 seconds
+2025-05-01 16:05:57,370 INFO Send command: 'command'
+2025-05-01 16:06:04,397 WARNING Aborting command 'command'. Did not receive a response after 7 seconds
+2025-05-01 16:06:04,397 ERROR Error al conectar: Command 'command' was unsuccessful for 4 tries. Latest response:	'Aborting command 'command'. Did not receive a response after 7 seconds'
+2025-05-01 16:06:04,397 INFO Reintentando en 2 segundos...
+2025-05-01 16:06:06,398 INFO Intento de conexión 3/3
+2025-05-01 16:06:06,398 INFO Send command: 'command'
+2025-05-01 16:06:13,435 WARNING Aborting command 'command'. Did not receive a response after 7 seconds
+2025-05-01 16:06:13,436 INFO Send command: 'command'
+2025-05-01 16:06:20,492 WARNING Aborting command 'command'. Did not receive a response after 7 seconds
+2025-05-01 16:06:20,492 INFO Send command: 'command'
+2025-05-01 16:06:27,530 WARNING Aborting command 'command'. Did not receive a response after 7 seconds
+2025-05-01 16:06:27,530 ERROR Error al conectar: Command 'command' was unsuccessful for 4 tries. Latest response:	'Aborting command 'command'. Did not receive a response after 7 seconds'
+2025-05-01 16:06:27,530 ERROR Se agotaron los intentos de conexión
+2025-05-01 16:06:27,530 ERROR No se pudo establecer conexión con el drone
+2025-05-01 16:37:13,502 INFO Tello instance was initialized. Host: '192.168.10.1'. Port: '8889'.
+2025-05-01 16:37:13,503 INFO Intento de conexión 1/3
+2025-05-01 16:37:13,506 INFO Send command: 'command'
+2025-05-01 16:37:20,558 WARNING Aborting command 'command'. Did not receive a response after 7 seconds
+2025-05-01 16:37:20,558 INFO Send command: 'command'
+2025-05-01 16:37:27,613 WARNING Aborting command 'command'. Did not receive a response after 7 seconds
+2025-05-01 16:37:27,613 INFO Send command: 'command'
+2025-05-01 16:37:34,654 WARNING Aborting command 'command'. Did not receive a response after 7 seconds
+2025-05-01 16:37:34,654 ERROR Error al conectar: Command 'command' was unsuccessful for 4 tries. Latest response:	'Aborting command 'command'. Did not receive a response after 7 seconds'
+2025-05-01 16:37:34,654 INFO Reintentando en 2 segundos...
+2025-05-01 16:37:36,655 INFO Intento de conexión 2/3
+2025-05-01 16:37:36,655 INFO Send command: 'command'
+2025-05-01 18:33:19,987 INFO Tello instance was initialized. Host: '192.168.10.1'. Port: '8889'.
+2025-05-01 18:33:19,987 INFO Intento de conexión 1/3
+2025-05-01 18:33:19,991 INFO Send command: 'command'
+2025-05-01 18:33:20,093 ERROR 'utf-8' codec can't decode byte 0xcc in position 0: invalid continuation byte
+2025-05-01 18:33:20,094 INFO Send command: 'command'
+2025-05-01 18:33:20,094 INFO Response command: 'OK'
+2025-05-01 18:33:21,106 ERROR Error al conectar: Did not receive a state packet from the Tello
+2025-05-01 18:33:21,106 INFO Reintentando en 2 segundos...
+2025-05-01 18:33:23,106 INFO Intento de conexión 2/3
+2025-05-01 18:33:23,107 INFO Send command: 'command'
+2025-05-01 18:33:23,107 INFO Response command: 'OK'
+2025-05-01 18:33:24,118 ERROR Error al conectar: Did not receive a state packet from the Tello
+2025-05-01 18:33:24,118 INFO Reintentando en 2 segundos...
+2025-05-01 18:33:26,118 INFO Intento de conexión 3/3
+2025-05-01 18:33:26,119 INFO Send command: 'command'
+2025-05-01 18:33:26,119 INFO Response command: 'OK'
+2025-05-01 18:33:27,130 ERROR Error al conectar: Did not receive a state packet from the Tello
+2025-05-01 18:33:27,130 ERROR Se agotaron los intentos de conexión
+2025-05-01 18:33:27,130 ERROR No se pudo establecer conexión con el drone
+2025-05-02 14:25:16,134 INFO Tello instance was initialized. Host: '192.168.10.1'. Port: '8889'.
+2025-05-02 14:25:16,134 INFO Intento de conexión 1/3
+2025-05-02 14:25:16,136 INFO Send command: 'command'
+2025-05-02 14:25:23,166 WARNING Aborting command 'command'. Did not receive a response after 7 seconds
+2025-05-02 14:25:23,166 INFO Send command: 'command'
+2025-05-02 14:25:30,194 WARNING Aborting command 'command'. Did not receive a response after 7 seconds
+2025-05-02 14:25:30,195 INFO Send command: 'command'
